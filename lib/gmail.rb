@@ -1,7 +1,5 @@
 require 'net/imap'
 require 'net/smtp'
-require 'date'
-require 'time'
 require 'mail'
 
 if RUBY_VERSION < "1.8.7"
@@ -210,27 +208,6 @@ class Gmail
 
   class NoLabel < RuntimeError; end
 
-  ##################################
-  #  Gmail.new(username, password)
-  ##################################
-  def initialize(username, password)
-    # This is to hide the username and password, not like it REALLY needs hiding, but ... you know.
-    # Could be helpful when demoing the gem in irb, these bits won't show up that way.
-    class << self
-      class << self
-        attr_accessor :username, :password
-      end
-    end
-    meta.username = username =~ /@/ ? username : username + '@gmail.com'
-    meta.password = password
-    @imap = Net::IMAP.new('imap.gmail.com',993,true,nil,false)
-    if block_given?
-      login # This is here intentionally. Normally, we get auto logged-in when first needed.
-      yield self
-      logout
-    end
-  end
-
   ###########################
   #  READING EMAILS
   # 
@@ -248,16 +225,6 @@ class Gmail
     mailboxes[name] ||= Mailbox.new(self, mailbox)
   end
   alias :mailbox :label
-
-  def deliver(mail=nil, &block)
-    require 'net/smtp'
-    require 'smtp_tls'
-    require 'mail'
-    mail = Mail.new(&block) if block_given?
-    mail.delivery_method(*smtp_settings)
-    mail.from = meta.username unless mail.from
-    mail.deliver!
-  end
 
   def in_mailbox(mailbox, &block)
     if block_given?
@@ -286,21 +253,6 @@ class Gmail
     end
     def mailbox_stack
       @mailbox_stack ||= []
-    end
-    def meta
-      class << self; self end
-    end
-    def domain
-      meta.username.split('@')[0]
-    end
-    def smtp_settings
-      [:smtp, {:address => "smtp.gmail.com",
-      :port => 587,
-      :domain => domain,
-      :user_name => meta.username,
-      :password => meta.password,
-      :authentication => 'plain',
-      :enable_starttls_auto => true}]
     end
 end
 
