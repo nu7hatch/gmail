@@ -34,5 +34,9 @@ module Gmail
       conn.delete(label) rescue false
     end
     alias :remove :delete
+    
+    def inspect
+      "#<Gmail::Labels#{'0x%04x' % (object_id << 1)}>"
+    end
   end # Labels
 end # Gmail

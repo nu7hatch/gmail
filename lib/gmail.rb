@@ -1,35 +1,78 @@
 require 'net/imap'
+require 'net/smtp'
 require 'date'
 require 'time'
+require 'mail'
+
+if RUBY_VERSION < "1.8.7"
+  require "smtp_tls"
+end
 
 module Gmail
-  autoload :Labels, "gmail/labels"
+  #autoload :Client,  "gmail/client"
+  autoload :Labels,  "gmail/labels"
+  autoload :Mailbox, "gmail/mailbox"
+  autoload :Message, "gmail/message"
+
+  class << self
+    def new(username, password, options={}, &block)
+      client = Client.new(username, password, options)
+      if block_given?
+        client.connect
+        yield client
+        client.logout
+      end
+    end
+    alias :connect :new
+    
+    def new!(username, password, options={}, &block)
+      client = Client.new(username, password, options)
+      if block_given?
+        client.connect! and client.login!
+        yield client
+        client.logout
+      end
+    end
+    alias :connect! :new!
+  end
 
   class Client
     # Raised when connection with GMail IMAP service couldn't be established. 
     class ConnectionError < SocketError; end
     # Raised when given username or password are invalid.
     class AuthorizationError < Net::IMAP::NoResponseError; end
+    # Raised when delivered email is invalid. 
+    class DeliveryError < ArgumentError; end
   
+    # GMail IMAP defaults
     GMAIL_IMAP_HOST = 'imap.gmail.com'
     GMAIL_IMAP_PORT = 993
+    
+    # GMail SMTP defaults
+    GMAIL_SMTP_HOST = "smtp.gmail.com"
+    GMAIL_SMTP_PORT = 587
   
     attr_reader :username
     attr_reader :password
     attr_reader :options
   
     def initialize(username, password, options={})
-      defaults  = { :raise_errors => true }
-      @username = google_username(username)
+      defaults  = {}
+      @username = fill_username(username)
       @password = password
       @options  = defaults.merge(options)
     end
     
     # Connect to gmail service. 
-    def connect
+    def connect(raise_errors=false)
       @imap = Net::IMAP.new(GMAIL_IMAP_HOST, GMAIL_IMAP_PORT, true, nil, false)
     rescue SocketError
-      options[:raise_errors] and raise ConnectionError, "Couldn't establish connection with GMail IMAP service"
+      raise_errors and raise ConnectionError, "Couldn't establish connection with GMail IMAP service"
+    end
+    
+    # This version of connect will raise error on failure...
+    def connect!
+      connect(true)
     end
     
     # Return current connection. Log in automaticaly to specified account if 
@@ -41,12 +84,18 @@ module Gmail
     alias :conn :connection
     
     # Login to specified account.
-    def login
+    def login(raise_errors=false)
       @imap and @logged_in = (login = @imap.login(username, password)) && login.name == 'OK'
     rescue Net::IMAP::NoResponseError
-      options[:raise_errors] and raise AuthorizationError, "Couldn't login to given GMail account: #{username}"
+      raise_errors and raise AuthorizationError, "Couldn't login to given GMail account: #{username}"
     end
     alias :sign_in :login
+    
+    # This version of login will raise error on failure...
+    def login!
+      login(true)
+    end
+    alias :sign_in! :login!
     
     # Returns +true+ when you are logged in to specified account.
     def logged_in?
@@ -68,8 +117,89 @@ module Gmail
       @labels ||= Labels.new(conn)
     end
     
-    def google_username(username)
+    # Compose new e-mail.
+    #
+    # ==== Examples
+    #   
+    #   mail = gmail.compose
+    #   mail.from "test@gmail.org"
+    #   mail.to "friend@gmail.com"
+    #
+    # ... or block style:
+    #  
+    #   mail = gmail.compose do 
+    #     from "test@gmail.org"
+    #     to "friend@gmail.com"
+    #     subject "Hello!"
+    #     body "Hello my friend! long time..."
+    #   end
+    #
+    # Now you can deliver your mail:
+    #
+    #   gmail.deliver(mail)
+    def compose(mail=nil, &block)
+      if block_given?
+        mail = Mail.new(&block)
+      elsif !mail 
+        mail = Mail.new
+      end 
+      mail.delivery_method(*smtp_settings)
+      mail.from = username unless mail.from
+      mail
+    end
+    alias :message :compose
+    
+    # Compose (optionaly) and send given email. 
+    #
+    # ==== Examples
+    #
+    #   gmail.deliver do 
+    #     to "friend@gmail.com"
+    #     subject "Hello friend!"
+    #     body "Hi! How are you?"
+    #   end
+    #
+    # ... or with already created message:
+    #
+    #   mail = Mail.new { ... }
+    #   gmail.deliver(mail)
+    #
+    #   mail = gmail.compose { ... }
+    #   gmail.deliver(mail) 
+    def deliver(mail=nil, raise_errors=false, &block)
+      mail = compose(mail, &block) if block_given?
+      mail.deliver!
+    rescue Object => ex
+      raise_errors and raise DeliveryError, "Couldn't deliver email: #{ex.to_s}"
+    end
+    
+    # This version of deliver will raise error on failure...
+    def deliver!(mail=nil, &block)
+      deliver(mail, true, &block)
+    end
+    
+    def inspect
+      "#<Gmail::Client#{'0x%04x' % (object_id << 1)} (#{username}) #{'dis' if !logged_in?}connected>"
+    end
+    
+    def fill_username(username)
       username =~ /@/ ? username : "#{username}@gmail.com"
+    end
+
+    def mail_domain
+      username.split('@')[0]
+    end
+    
+    def smtp_settings
+      [:smtp, {
+        :address => GMAIL_SMTP_HOST,
+        :port => GMAIL_SMTP_PORT,
+        :domain => mail_domain,
+        :user_name => username,
+        :password => password,
+        :authentication => 'plain',
+        :enable_starttls_auto => true
+      }]
     end
   end # Client
 end # Gmail
@@ -112,43 +242,12 @@ class Gmail
   def inbox
     in_label('inbox')
   end
-  
-  def create_label(name)
-    imap.create(name)
-  end
-
-  # List the available labels
-  def labels
-    (imap.list("", "%") + imap.list("[Gmail]/", "%")).inject([]) { |labels,label|
-      label[:name].each_line { |l| labels << l }; labels }
-  end
 
   # gmail.label(name)
   def label(name)
     mailboxes[name] ||= Mailbox.new(self, mailbox)
   end
   alias :mailbox :label
-
-  ###########################
-  #  MAKING EMAILS
-  # 
-  #  gmail.generate_message do
-  #    ...inside Mail context...
-  #  end
-  # 
-  #  gmail.deliver do ... end
-  # 
-  #  mail = Mail.new...
-  #  gmail.deliver!(mail)
-  ###########################
-  def generate_message(&block)
-    require 'net/smtp'
-    require 'smtp_tls'
-    require 'mail'
-    mail = Mail.new(&block)
-    mail.delivery_method(*smtp_settings)
-    mail
-  end
 
   def deliver(mail=nil, &block)
     require 'net/smtp'
@@ -158,25 +257,6 @@ class Gmail
     mail.delivery_method(*smtp_settings)
     mail.from = meta.username unless mail.from
     mail.deliver!
-  end
-  
-  ###########################
-  #  LOGIN
-  ###########################
-  def login
-    res = @imap.login(meta.username, meta.password)
-    @logged_in = true if res && res.name == 'OK'
-  end
-  def logged_in?
-    !!@logged_in
-  end
-  # Log out of gmail
-  def logout
-    if logged_in?
-      res = @imap.logout
-    end
-  ensure
-    @logged_in = false
   end
 
   def in_mailbox(mailbox, &block)
@@ -199,22 +279,6 @@ class Gmail
     end
   end
   alias :in_label :in_mailbox
-
-  ###########################
-  #  Other...
-  ###########################
-  def inspect
-    "#<Gmail:#{'0x%x' % (object_id << 1)} (#{meta.username}) #{'dis' if !logged_in?}connected>"
-  end
-  
-  # Accessor for @imap, but ensures that it's logged in first.
-  def imap
-    unless logged_in?
-      login
-      at_exit { logout } # Set up auto-logout for later.
-    end
-    @imap
-  end
 
   private
     def mailboxes
