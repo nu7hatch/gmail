@@ -1,44 +1,50 @@
-# -*- ruby -*-
+#!/usr/bin/env ruby
 
 require 'rubygems'
 
 begin
   require 'jeweler'
+  
   Jeweler::Tasks.new do |gem|
-    gem.name = "ruby-gmail"
+    gem.name = "gmail"
     gem.summary = %Q{A Rubyesque interface to Gmail, with all the tools you'll need.}
-    gem.description = %Q{A Rubyesque interface to Gmail, with all the tools you'll need. Search, read and send multipart emails; archive, mark as read/unread, delete emails; and manage labels.}
-    gem.email = "gems@behindlogic.com"
-    gem.homepage = "http://dcparker.github.com/ruby-gmail"
-    gem.authors = ["BehindLogic"]
-    gem.post_install_message = "\n\033[34mIf ruby-gmail saves you TWO hours of work, want to compensate me for, like, a half-hour?\nSupport me in making new and better gems:\033[0m \033[31;4mhttp://pledgie.com/campaigns/7087\033[0m\n\n"
-    gem.add_dependency('shared-mime-info', '>= 0')
-    gem.add_dependency('mail', '>= 2.2.1')
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+    gem.description = <<-DESCR
+      A Rubyesque interface to Gmail, with all the tools you'll need. Search, 
+      read and send multipart emails; archive, mark as read/unread, delete emails; 
+      and manage labels.
+    DESCR
+    gem.email = "kriss.kowalik@gmail.com"
+    gem.homepage = "http://github.com/nu7hatch/ruby-gmail"
+    gem.authors = ["BehindLogic", "Kriss 'nu7hatch' Kowalik"]
+    gem.add_dependency 'mime', '>= 0'
+    gem.add_dependency 'mail', '>= 2.2.1'
+    gem.add_development_dependency 'rspec', '~> 2.0'
+    gem.add_development_dependency 'mocha', '>= 0.9'
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
 
-require 'rake/testtask'
-Rake::TestTask.new(:test) do |test|
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.pattern = 'spec/**/*_spec.rb'
+  t.rspec_opts = %q[--colour --backtrace]
 end
 
-begin
-  require 'rcov/rcovtask'
-  Rcov::RcovTask.new do |test|
-    test.libs << 'test'
-    test.pattern = 'test/**/test_*.rb'
-    test.verbose = true
-  end
-rescue LoadError
-  task :rcov do
-    abort "RCov is not available. In order to run rcov, you must: sudo gem install spicycode-rcov"
-  end
+RSpec::Core::RakeTask.new(:rcov) do |t|
+  t.rcov = true
+  t.rspec_opts = %q[--colour --backtrace]
+  t.rcov_opts = %q[--exclude "spec" --text-report]
 end
 
-task :default => :test
+task :default => :spec
+
+require 'rake/rdoctask'
+Rake::RDocTask.new do |rdoc|
+  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title = "Tim #{version}"
+  rdoc.rdoc_files.include('README*')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
