@@ -1,5 +1,80 @@
 require 'net/imap'
+require 'date'
+require 'time'
 
+module Gmail
+  autoload :Labels, "gmail/labels"
+
+  class Client
+    # Raised when connection with GMail IMAP service couldn't be established. 
+    class ConnectionError < SocketError; end
+    # Raised when given username or password are invalid.
+    class AuthorizationError < Net::IMAP::NoResponseError; end
+  
+    GMAIL_IMAP_HOST = 'imap.gmail.com'
+    GMAIL_IMAP_PORT = 993
+  
+    attr_reader :username
+    attr_reader :password
+    attr_reader :options
+  
+    def initialize(username, password, options={})
+      defaults  = { :raise_errors => true }
+      @username = google_username(username)
+      @password = password
+      @options  = defaults.merge(options)
+    end
+    
+    # Connect to gmail service. 
+    def connect
+      @imap = Net::IMAP.new(GMAIL_IMAP_HOST, GMAIL_IMAP_PORT, true, nil, false)
+    rescue SocketError
+      options[:raise_errors] and raise ConnectionError, "Couldn't establish connection with GMail IMAP service"
+    end
+    
+    # Return current connection. Log in automaticaly to specified account if 
+    # it is necessary.
+    def connection
+      login and at_exit { logout } unless logged_in?
+      @imap
+    end
+    alias :conn :connection
+    
+    # Login to specified account.
+    def login
+      @imap and @logged_in = (login = @imap.login(username, password)) && login.name == 'OK'
+    rescue Net::IMAP::NoResponseError
+      options[:raise_errors] and raise AuthorizationError, "Couldn't login to given GMail account: #{username}"
+    end
+    alias :sign_in :login
+    
+    # Returns +true+ when you are logged in to specified account.
+    def logged_in?
+      !!@logged_in
+    end
+    alias :signed_in? :logged_in?
+    
+    # Logout from GMail service. 
+    def logout
+      @imap && logged_in? and @imap.logout
+    ensure
+      @logged_in = false
+    end
+    alias :sign_out :logout
+    
+    # Return labels object, which helps you with managing your GMail labels.
+    # See <tt>Gmail::Labels</tt> for details.
+    def labels
+      @labels ||= Labels.new(conn)
+    end
+    
+    def google_username(username)
+      username =~ /@/ ? username : "#{username}@gmail.com"
+    end
+  end # Client
+end # Gmail
+
+=begin
 class Gmail
   VERSION = '0.0.9'
 
@@ -167,3 +242,4 @@ end
 
 require 'gmail/mailbox'
 require 'gmail/message'
+=end
