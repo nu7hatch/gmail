@@ -1,17 +1,19 @@
-require 'test_helper'
+require 'helper'
+
+TEST_ACCOUNT = ["test.tim.rubygem@gmail.com", "yadayadayada"] 
 
 class GmailTest < Test::Unit::TestCase
   def test_initialize
     imap = mock('imap')
     Net::IMAP.expects(:new).with('imap.gmail.com', 993, true, nil, false).returns(imap)
-    gmail = Gmail.new('test', 'password')
+    gmail = Gmail.new(*TEST_ACCOUNT)
   end
   
   def test_imap_does_login
     setup_mocks(:at_exit => true)
 
     @imap.expects(:disconnected?).at_least_once.returns(true).then.returns(false)
-    @imap.expects(:login).with('test@gmail.com', 'password')
+    @imap.expects(:login).with(*TEST_ACCOUNT)
     @gmail.imap
   end
 
@@ -19,7 +21,7 @@ class GmailTest < Test::Unit::TestCase
     setup_mocks(:at_exit => true)
 
     @imap.expects(:disconnected?).at_least_once.returns(true).then.returns(false)
-    @imap.expects(:login).with('test@gmail.com', 'password')
+    @imap.expects(:login).with(*TEST_ACCOUNT)
     @gmail.imap
     @gmail.imap
     @gmail.imap
@@ -29,7 +31,7 @@ class GmailTest < Test::Unit::TestCase
     setup_mocks(:at_exit => true)
 
     @imap.expects(:disconnected?).at_least_once.returns(true).then.returns(false)
-    @imap.expects(:login).with('test@gmail.com', 'password')
+    @imap.expects(:login).with(*TEST_ACCOUNT)
     @gmail.imap
   end
   
@@ -37,7 +39,7 @@ class GmailTest < Test::Unit::TestCase
     setup_mocks(:at_exit => true)
 
     @imap.expects(:disconnected?).at_least_once.returns(true).then.returns(false)
-    @imap.expects(:login).with('test@gmail.com', 'password')
+    @imap.expects(:login).with(*TEST_ACCOUNT)
     @gmail.imap
     @imap.expects(:logout).returns(true)
     @gmail.logout
@@ -54,7 +56,7 @@ class GmailTest < Test::Unit::TestCase
   def test_imap_calls_create_label
     setup_mocks(:at_exit => true)
     @imap.expects(:disconnected?).at_least_once.returns(true).then.returns(false)
-    @imap.expects(:login).with('test@gmail.com', 'password')
+    @imap.expects(:login).with(*TEST_ACCOUNT)
     @imap.expects(:create).with('foo')
     @gmail.create_label('foo')
   end
@@ -64,7 +66,7 @@ class GmailTest < Test::Unit::TestCase
     options = {:at_exit => false}.merge(options)
     @imap = mock('imap')
     Net::IMAP.expects(:new).with('imap.gmail.com', 993, true, nil, false).returns(@imap)
-    @gmail = Gmail.new('test@gmail.com', 'password')
+    @gmail = Gmail.new(*TEST_ACCOUNT)
     
     # need this for the at_exit block that auto-exits after this test method completes
     @imap.expects(:logout).at_least(0) if options[:at_exit]

@@ -90,7 +90,7 @@ class Gmail
   ###########################
   def login
     res = @imap.login(meta.username, meta.password)
-    @logged_in = true if res.name == 'OK'
+    @logged_in = true if res && res.name == 'OK'
   end
   def logged_in?
     !!@logged_in
@@ -99,8 +99,9 @@ class Gmail
   def logout
     if logged_in?
       res = @imap.logout
-      @logged_in = false if res.name == 'OK'
     end
+  ensure
+    @logged_in = false
   end
 
   def in_mailbox(mailbox, &block)
