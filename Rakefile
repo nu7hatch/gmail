@@ -14,7 +14,7 @@ begin
       and manage labels.
     DESCR
     gem.email = "kriss.kowalik@gmail.com"
-    gem.homepage = "http://github.com/nu7hatch/ruby-gmail"
+    gem.homepage = "http://github.com/nu7hatch/gmail"
     gem.authors = ["BehindLogic", "Kriss 'nu7hatch' Kowalik"]
     gem.add_dependency 'mime', '>= 0.1'
     gem.add_dependency 'mail', '>= 2.2.1'
@@ -46,7 +46,7 @@ require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "GMail #{version}"
+  rdoc.title = "Ruby GMail #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
