@@ -240,8 +240,8 @@ Or, generate the message first and send it later
 
 ## Copyright
 
-Copyrignt (c) 2010 Kriss 'nu7hatch' Kowalik
-Copyright (c) 2009-2010 BehindLogic
+* Copyrignt (c) 2010 Kriss 'nu7hatch' Kowalik
+* Copyright (c) 2009-2010 BehindLogic
 
 See LICENSE for details.
 
