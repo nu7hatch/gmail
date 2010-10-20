@@ -1,71 +1,85 @@
-require 'date'
-require 'time'
-class Object
-  def to_imap_date
-    Date.parse(to_s).strftime("%d-%B-%Y")
-  end
-end
-
-class Gmail
+module Gmail
   class Mailbox
+    MAILBOX_ALIASES = {
+      :all    => ['ALL'],
+      :unread => ['UNSEEN'],
+      :read   => ['SEEN']
+    }
+  
     attr_reader :name
 
-    def initialize(gmail, name)
+    def initialize(gmail, name="INBOX")
+      @name  = name
       @gmail = gmail
-      @name = name
     end
 
+    # Returns list of emails which meets given criteria. 
+    #
+    # ==== Examples
+    #
+    #   gmail.inbox.emails(:all)
+    #   gmail.inbox.emails(:unread, :from => "friend@gmail.com")
+    #   gmail.inbox.emails(:all, :after => Time.now-(20*24*3600))
+    #   gmail.mailbox("Test").emails(:read)
+    #
+    #   gmail.mailbox("Test") do |box| 
+    #     box.emails(:read)
+    #     box.emails(:unread)
+    #   end
+    def emails(*args)
+      args << :all if args.size == 0
+
+      if args.first.is_a?(Symbol) 
+        search = MAILBOX_ALIASES[args.shift]
+        opts = args.first.is_a?(Hash) ? args.first : {}
+        
+        opts[:after]      and search.concat ['SINCE', opts[:after].to_imap_date]
+        opts[:before]     and search.concat ['BEFORE', opts[:before].to_imap_date]
+        opts[:on]         and search.concat ['ON', opts[:on].to_imap_date]
+        opts[:from]       and search.concat ['FROM', opts[:from]]
+        opts[:to]         and search.concat ['TO', opts[:to]]
+        opts[:subject]    and search.concat ['SUBJECT', opts[:subject]]
+        opts[:label]      and search.concat ['LABEL', opts[:label]]
+        opts[:attachment] and search.concat ['HAS', 'attachment']
+        opts[:search]     and search.concat [opts[:search]]
+        
+        @gmail.mailbox(name) do
+          @gmail.conn.uid_search(search).collect {|uid| messages[uid] ||= Message.new(self, uid) }
+        end
+      elsif args.first.is_a?(Hash)
+        emails(:all, *args)
+      else
+        raise ArgumentError, "Invalid search criteria"
+      end
+    end
+    alias :mails :emails
+    alias :search :emails
+    alias :find :emails
+
+    # This is a convenience method that really probably shouldn't need to exist, 
+    # but it does make code more readable, if seriously all you want is the count 
+    # of messages.
+    #
+    # ==== Examples
+    #
+    #   gmail.inbox.count(:all)
+    #   gmail.inbox.count(:unread, :from => "friend@gmail.com")
+    #   gmail.mailbox("Test").count(:all, :after => Time.now-(20*24*3600))
+    def count(*args)
+      emails(*args).size
+    end
+
+    # Cached messages. 
+    def messages
+      @messages ||= {}
+    end
+    
     def inspect
-      "<#Mailbox name=#{@name}>"
+      "#<Gmail::Mailbox name=#{@name}>"
     end
 
     def to_s
       name
     end
-
-    # Method: emails
-    # Args: [ :all | :unread | :read ]
-    # Opts: {:since => Date.new}
-    def emails(key_or_opts = :all, opts={})
-      if key_or_opts.is_a?(Hash) && opts.empty?
-        search = ['ALL']
-        opts = key_or_opts
-      elsif key_or_opts.is_a?(Symbol) && opts.is_a?(Hash)
-        aliases = {
-          :all => ['ALL'],
-          :unread => ['UNSEEN'],
-          :read => ['SEEN']
-        }
-        search = aliases[key_or_opts]
-      elsif key_or_opts.is_a?(Array) && opts.empty?
-        search = key_or_opts
-      else
-        raise ArgumentError, "Couldn't make sense of arguments to #emails - should be an optional hash of options preceded by an optional read-status bit; OR simply an array of parameters to pass directly to the IMAP uid_search call."
-      end
-      if !opts.empty?
-        # Support for several search macros
-        # :before => Date, :on => Date, :since => Date, :from => String, :to => String
-        search.concat ['SINCE', opts[:after].to_imap_date] if opts[:after]
-        search.concat ['BEFORE', opts[:before].to_imap_date] if opts[:before]
-        search.concat ['ON', opts[:on].to_imap_date] if opts[:on]
-        search.concat ['FROM', opts[:from]] if opts[:from]
-        search.concat ['TO', opts[:to]] if opts[:to]
-      end
-
-      # puts "Gathering #{(aliases[key] || key).inspect} messages for mailbox '#{name}'..."
-      @gmail.in_mailbox(self) do
-        @gmail.imap.uid_search(search).collect { |uid| messages[uid] ||= Message.new(@gmail, self, uid) }
-      end
-    end
-
-    # This is a convenience method that really probably shouldn't need to exist, but it does make code more readable
-    # if seriously all you want is the count of messages.
-    def count(*args)
-      emails(*args).length
-    end
-
-    def messages
-      @messages ||= {}
-    end
-  end
-end
+  end # Message
+end # Gmail

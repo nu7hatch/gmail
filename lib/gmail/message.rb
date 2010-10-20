@@ -1,4 +1,21 @@
 require 'mime/message'
+
+module Gmail
+  class Message
+    attr_reader :uid
+    
+    def initialize(mailbox, uid)
+      @uid     = uid
+      @mailbox = mailbox
+    end
+    
+    def uid
+      @uid ||= @gmail.imap.uid_search(['HEADER', 'Message-ID', message_id])[0]
+    end
+  end
+end # Gmail
+
+=begin
 class Gmail
   class Message
     def initialize(gmail, mailbox, uid)
@@ -102,3 +119,4 @@ class Gmail
     end
   end
 end
+=end

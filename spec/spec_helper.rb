@@ -9,3 +9,5 @@ require 'gmail'
 RSpec.configure do |config| 
   config.mock_with :mocha
 end
+
+TEST_ACCOUNT = ["test.tim.rubygem@gmail.com", "yadayadayada"]
