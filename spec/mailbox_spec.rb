@@ -18,7 +18,7 @@ describe "A Gmail mailbox" do
       end
     end
     
-    it "name should be INBOX by default" do
+    it "should work in INBOX by default" do
       within_gmail do |gmail|
         mailbox = subject.new(@gmail)
         mailbox.name.should == "INBOX"
@@ -41,5 +41,8 @@ describe "A Gmail mailbox" do
       end
     end
     
+    it "should be able to find messages" do
+      pending
+    end
   end
 end

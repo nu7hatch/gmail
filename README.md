@@ -1,117 +1,190 @@
-# ruby-gmail
+# GMail for Ruby
 
-* Homepage: [http://dcparker.github.com/ruby-gmail/](http://dcparker.github.com/ruby-gmail/)
-* Code: [http://github.com/dcparker/ruby-gmail](http://github.com/dcparker/ruby-gmail)
-* Gem: [http://gemcutter.org/gems/ruby-gmail](http://gemcutter.org/gems/ruby-gmail)
+A Rubyesque interface to Google's GMail, with all the tools you'll need. Search, 
+read and send multipart emails, archive, mark as read/unread, delete emails, 
+and manage labels.
+
+It's based on Daniel Parker's ruby-gmail gem. This version has more friendy
+API, is well tested, better documented and have many other improvements.  
 
 ## Author(s)
 
-* Daniel Parker of BehindLogic.com
+* Kriss 'nu7hatch' Kowalik
+* [Daniel Parker of BehindLogic.com](http://github.com/dcparker)
 
 Extra thanks for specific feature contributions from:
 
-  * [Justin Perkins](http://github.com/justinperkins)
-  * [Mikkel Malmberg](http://github.com/mikker)
-  * [Julien Blanchard](http://github.com/julienXX)
-  * [Federico Galassi](http://github.com/fgalassi)
+* [Justin Perkins](http://github.com/justinperkins)
+* [Mikkel Malmberg](http://github.com/mikker)
+* [Julien Blanchard](http://github.com/julienXX)
+* [Federico Galassi](http://github.com/fgalassi)
 
-## Description
+## Installation
 
-A Rubyesque interface to Gmail, with all the tools you'll need. Search, read and send multipart emails; archive, mark as read/unread, delete emails; and manage labels.
+You can install it easy using rubygems:
+
+    sudo gem install gmail
+    
+Or install it manualy:
+
+    git clone git://github.com/nu7hatch/gmail.git
+    cd gmail
+    rake install
+
+To install gmail gem you have to met following requirements (with rubygems all 
+will be installed automatically):
+
+* mail
+* mime
+* smpt_tls (Ruby < 1.8.7)
 
 ## Features
 
 * Search emails
 * Read emails (handles attachments)
-* Emails: Label, archive, delete, mark as read/unread/spam
-* Create and delete labels
-* Create and send multipart email messages in plaintext and/or html, with inline images and attachments
-* Utilizes Gmail's IMAP & SMTP, MIME-type detection and parses and generates MIME properly.
+* Emails: label, archive, delete, mark as read/unread/spam, star
+* Manage labels
+* Create and send multipart email messages in plaintext and/or html, with inline 
+  images and attachments
+* Utilizes Gmail's IMAP & SMTP, MIME-type detection and parses and generates 
+  MIME properly.
 
-## Problems:
+## Basic usage
 
-* May not correctly read malformed MIME messages. This could possibly be corrected by having IMAP parse the MIME structure.
-* Cannot grab the plain or html message without also grabbing attachments. It might be nice to lazy-[down]load attachments.
-
-## Example Code:
-
-### 1) Require gmail
+First of all require the `gmail` library.
 
     require 'gmail'
     
-### 2) Start an authenticated gmail session
+### Authenticating gmail sessions
 
-    #    If you pass a block, the session will be passed into the block,
-    #    and the session will be logged out after the block is executed.
-    gmail = Gmail.new(username, password)
-    # ...do things...
+This will you automatically log in to your account. 
+
+    gmail = Gmail.connect(username, password)
+    # play with your gmail...
     gmail.logout
 
-    Gmail.new(username, password) do |gmail|
-      # ...do things...
+If you pass a block, the session will be passed into the block, and the session 
+will be logged out after the block is executed.
+
+    Gmail.connect(username, password) do |gmail|
+      # play with your gmail...
+    end
+    
+Examples above are "quiet", it means that it will not raise any errors when 
+session couldn't be started (eg. because of connection error or invalid 
+authorization data). You can use connection which handles errors raising:
+
+    Gmail.connect!(username, password)
+    Gmail.connect!(username, password) {|gmail| ... play with gmail ... }
+    
+You can also check if you are logged in at any time:
+
+    Gmail.connect(username, password) do |gmail|
+      gmail.logged_in?
     end
 
-### 3) Count and gather emails!
+### Counting and gathering emails
     
-    # Get counts for messages in the inbox
+Get counts for messages in the inbox:
+
     gmail.inbox.count
     gmail.inbox.count(:unread)
     gmail.inbox.count(:read)
 
-    # Count with some criteria
+Count with some criteria:
+
     gmail.inbox.count(:after => Date.parse("2010-02-20"), :before => Date.parse("2010-03-20"))
     gmail.inbox.count(:on => Date.parse("2010-04-15"))
     gmail.inbox.count(:from => "myfriend@gmail.com")
     gmail.inbox.count(:to => "directlytome@gmail.com")
 
-    # Combine flags and options
+Combine flags and options:
+
     gmail.inbox.count(:unread, :from => "myboss@gmail.com")
     
-    # Labels work the same way as inbox
+Browsing labeled emails is similar to work with inbox.
+
     gmail.mailbox('Urgent').count
     
-    # Getting messages works the same way as counting: optional flag, and optional arguments
-    # Remember that every message in a conversation/thread will come as a separate message.
+Getting messages works the same way as counting: Remember that every message in a 
+conversation/thread will come as a separate message.
+
     gmail.inbox.emails(:unread, :before => Date.parse("2010-04-20"), :from => "myboss@gmail.com")
 
-### 4) Work with emails!
+You can use also one of aliases:
 
-    # any news older than 4-20, mark as read and archive it...
-    gmail.inbox.emails(:before => Date.parse("2010-04-20"), :from => "news@nbcnews.com").each do |email|
-      email.mark(:read) # can also mark :unread or :spam
+    gmail.inbox.find(...)
+    gmail.inbox.search(...)
+    gmail.inbox.mails(...)    
+    
+Also you can manipulate each message using block style:
+
+    gmail.inbox.find(:unread) do |email|
+      email.read!
+    end
+    
+### Working with emails!
+
+Any news older than 4-20, mark as read and archive it:
+
+    gmail.inbox.find(:before => Date.parse("2010-04-20"), :from => "news@nbcnews.com") do |email|
+      email.read! # can also unread!, spam! or star!
       email.archive!
     end
 
-    # delete emails from X...
-    gmail.inbox.emails(:from => "x-fiancé@gmail.com").each do |email|
+Delete emails from X:
+
+    gmail.inbox.find(:from => "x-fiance@gmail.com").each do |email|
       email.delete!
     end
 
-    # Save all attachments in the "Faxes" label to a folder
+Save all attachments in the "Faxes" label to a local folder:
+
     folder = "/where/ever"
-    gmail.mailbox("Faxes").emails.each do |email|
+    gmail.mailbox("Faxes").emails do |email|
       if !email.message.attachments.empty?
         email.message.save_attachments_to(folder)
       end
     end
+     
+You can use also `#label` method instead of `#mailbox`: 
 
-    # Save just the first attachment from the newest unread email (assuming pdf)
-    # For #save_to_file:
-    #   + provide a path - save to attachment filename in path
-    #   + provide a filename - save to file specified
-    #   + provide no arguments - save to attachment filename in current directory
-    email = gmail.inbox.emails(:unread).first
+    gmail.label("Faxes").emails {|email| ... }
+
+Save just the first attachment from the newest unread email (assuming pdf):
+
+    email = gmail.inbox.find(:unread).first
     email.attachments[0].save_to_file("/path/to/location")
 
-    # Add a label to a message
+Add a label to a message:
+
     email.label("Faxes")
+    
+Example above will raise error when you don't have the `Faxes` label. You can 
+avoid this using:
 
-    # Or "move" the message to a label
+    email.label!("Faxes") # The `Faxes` label will be automatically created now
+
+You can also move message to a label/mailbox:
+ 
     email.move_to("Faxes")
+    email.move_to!("NewLabel")
+    
+There is also few shortcuts to mark messages quickly:
 
-### 5) Create new emails!
+    email.read!
+    email.unread!
+    email.spam!
+    email.star!
+    email.unstar!
 
-Creating emails now uses the amazing [Mail](http://rubygems.org/gems/mail) rubygem. See its [documentation here](http://github.com/mikel/mail). Ruby-gmail will automatically configure your Mail emails to be sent via your Gmail account's SMTP, so they will be in your Gmail's "Sent" folder. Also, no need to specify the "From" email either, because ruby-gmail will set it for you.
+### Composing and sending emails
+
+Creating emails now uses the amazing [Mail](http://rubygems.org/gems/mail) rubygem. 
+See its [documentation here](http://github.com/mikel/mail). The Ruby Gmail will 
+automatically configure your Mail emails to be sent via your Gmail account's SMTP, 
+so they will be in your Gmail's "Sent" folder. Also, no need to specify the "From" 
+email either, because ruby-gmail will set it for you.
 
     gmail.deliver do
       to "email@example.com"
@@ -124,49 +197,30 @@ Creating emails now uses the amazing [Mail](http://rubygems.org/gems/mail) rubyg
       end
       add_file "/path/to/some_image.jpg"
     end
-    # Or, generate the message first and send it later
+
+Or, generate the message first and send it later
+
     email = gmail.generate_message do
       to "email@example.com"
       subject "Having fun in Puerto Rico!"
       body "Spent the day on the road..."
     end
-    email.deliver!
-    # Or...
-    gmail.deliver(email)
+    email.deliver! # or: gmail.deliver(email)
 
-## Requirements
+## Note on Patches/Pull Requests
+ 
+* Fork the project.
+* Make your feature addition or bug fix.
+* Add tests for it. This is important so I don't break it in a
+  future version unintentionally.
+* Commit, do not mess with rakefile, version, or history.
+  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+* Send me a pull request. Bonus points for topic branches.
 
-* ruby
-* net/smtp
-* net/imap
-* tmail
-* shared-mime-info rubygem (for MIME-detection when attaching files)
+## Copyright
 
-## Install
+Copyrignt (c) 2010 Kriss 'nu7hatch' Kowalik
+Copyright (c) 2009-2010 BehindLogic
 
-    gem install ruby-gmail
+See LICENSE for details.
 
-## License
-
-(The MIT License)
-
-Copyright (c) 2009 BehindLogic
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -7,116 +7,120 @@ module Gmail
     def initialize(mailbox, uid)
       @uid     = uid
       @mailbox = mailbox
+      @gmail   = mailbox.instance_variable_get("@gmail") if mailbox
     end
     
     def uid
       @uid ||= @gmail.imap.uid_search(['HEADER', 'Message-ID', message_id])[0]
     end
-  end
-end # Gmail
-
-=begin
-class Gmail
-  class Message
-    def initialize(gmail, mailbox, uid)
-      @gmail = gmail
-      @mailbox = mailbox
-      @uid = uid
+    
+    # Mark message with given flag.
+    def flag(name)
+      !!@gmail.mailbox(@mailbox.name) { @gmail.imap.uid_store(uid, "+FLAGS", [name]) }
     end
-
-    def inspect
-      "<#Message:#{object_id} mailbox=#{@mailbox.name}#{' uid='+@uid.to_s if @uid}#{' message_id='+@message_id.to_s if @message_id}>"
+    
+    # Unmark message. 
+    def unflag(name)
+      !!@gmail.mailbox(@mailbox.name) { @gmail.imap.uid_store(uid, "+FLAGS", [name]) }
     end
-
-    # Auto IMAP info
-    def uid
-      @uid ||= @gmail.imap.uid_search(['HEADER', 'Message-ID', message_id])[0]
-    end
-
-    # IMAP Operations
-    def flag(flg)
-      @gmail.in_mailbox(@mailbox) do
-        @gmail.imap.uid_store(uid, "+FLAGS", [flg])
-      end ? true : false
-    end
-
-    def unflag(flg)
-      @gmail.in_mailbox(@mailbox) do
-        @gmail.imap.uid_store(uid, "-FLAGS", [flg])
-      end ? true : false
-    end
-
-    # Gmail Operations
+    
+    # Do commonly used operations on message. 
     def mark(flag)
       case flag
-      when :read
-        flag(:Seen)
-      when :unread
-        unflag(:Seen)
-      when :deleted
-        flag(:Deleted)
-      when :spam
-        move_to('[Gmail]/Spam')
-      end ? true : false
+        when :read    then read!
+        when :unread  then unread!
+        when :deleted then delete!
+        when :spam    then spam!
+      else
+        flag(flag)
+      end
     end
-
+    
+    # Mark this message as a spam.
+    def spam!
+      move_to('[Gmail]/Spam')
+    end
+    
+    # Mark as read.
+    def read!
+      flag(:Seen)
+    end
+    
+    # Mark as unread.
+    def unread!
+      unflag(:Seen)
+    end
+    
+    # Mark message with star.
+    def star!
+      flag('[Gmail]/Starred')
+    end
+    
+    # Remove message from list of starred.
+    def unstar!
+      unflag('[Gmail]/Starred')
+    end
+    
+    # Move to trash.
     def delete!
       @mailbox.messages.delete(uid)
       flag(:Deleted)
     end
 
-    def label(name)
-      @gmail.in_mailbox(@mailbox) do
-        begin
-          @gmail.imap.uid_copy(uid, name)
-        rescue Net::IMAP::NoResponseError
-          raise Gmail::NoLabel, "No label `#{name}' exists!"
-        end
-      end
-    end
-
-    def label!(name)
-      @gmail.in_mailbox(@mailbox) do
-        begin
-          @gmail.imap.uid_copy(uid, name)
-        rescue Net::IMAP::NoResponseError
-          # need to create the label first
-          @gmail.create_label(name)
-          retry
-        end
-      end
-    end
-
-    # We're not sure of any 'labels' except the 'mailbox' we're in at the moment.
-    # Research whether we can find flags that tell which other labels this email is a part of.
-    # def remove_label(name)
-    # end
-
-    def move_to(name)
-      label(name) && delete!
-    end
-
+    # Archive this message.
     def archive!
       move_to('[Gmail]/All Mail')
     end
+    
+    # Move to given box and delete from others.  
+    def move_to(name)
+      label(name) && delete!
+    end
+    alias :move :move_to
+    
+    # Move message to given and delete from others. When given mailbox doesn't 
+    # exist then it will be automaticaly created. 
+    def move_to!(name)
+      label!(name) && delete!
+    end
+    alias :move! :move_to
+    
+    # Mark this message with given label. When given label doesn't exist then
+    # it will raise <tt>NoLabelError</tt>. 
+    #
+    # See also <tt>Gmail::Message#label!</tt>.
+    def label(name)
+      @gmail.mailbox(@mailbox.name) { @gmail.imap.uid_copy(uid, name) }
+    rescue Net::IMAP::NoResponseError
+      raise NoLabelError, "Label '#{name}' doesn't exist!"
+    end
 
+    # Mark this message with given label. When given label doesn't exist then
+    # it will be automaticaly created. 
+    #
+    # See also <tt>Gmail::Message#label</tt>.
+    def label!(name)
+      label(name) 
+    rescue NoLabelError
+      @gmail.labels.add(name)
+      label!(name)
+    end
+    
+    def inspect
+      "#<Gmail::Message#{'0x%04x' % (object_id << 1)} mailbox=#{@mailbox.name}#{' uid='+@uid.to_s if @uid}#{' message_id='+@message_id.to_s if @message_id}>"
+    end
+    
+    def method_missing(meth, *args, &block)
+      # Delegate rest directly to the message.  
+      message.send(meth, *args, &block)
+    end
+    
     private
-
-    # Parsed MIME message object
+    
     def message
-      require 'mail'
-      _body = @gmail.in_mailbox(@mailbox) { @gmail.imap.uid_fetch(uid, "RFC822")[0].attr["RFC822"] }
-      @message ||= Mail.new(_body)
+      @message ||= Mail.new(@gmail.in_mailbox(@mailbox.name) { 
+        @gmail.imap.uid_fetch(uid, "RFC822")[0].attr["RFC822"] 
+      })
     end
-
-    # Delegate all other methods to the Mail message
-    def method_missing(*args, &block)
-      if block_given?
-        message.send(*args, &block)
-      else
-        message.send(*args)
-      end
-    end
-  end
-end
-=end
+  end # Message
+end # Gmail

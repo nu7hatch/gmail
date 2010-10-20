@@ -16,7 +16,7 @@ begin
     gem.email = "kriss.kowalik@gmail.com"
     gem.homepage = "http://github.com/nu7hatch/ruby-gmail"
     gem.authors = ["BehindLogic", "Kriss 'nu7hatch' Kowalik"]
-    gem.add_dependency 'mime', '>= 0'
+    gem.add_dependency 'mime', '>= 0.1'
     gem.add_dependency 'mail', '>= 2.2.1'
     gem.add_development_dependency 'rspec', '~> 2.0'
     gem.add_development_dependency 'mocha', '>= 0.9'
@@ -38,6 +38,8 @@ RSpec::Core::RakeTask.new(:rcov) do |t|
   t.rcov_opts = %q[--exclude "spec" --text-report]
 end
 
+task :spec => :check_dependencies
+task :rcov => :check_dependencies
 task :default => :spec
 
 require 'rake/rdoctask'

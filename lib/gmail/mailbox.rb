@@ -24,9 +24,11 @@ module Gmail
     #
     #   gmail.mailbox("Test") do |box| 
     #     box.emails(:read)
-    #     box.emails(:unread)
+    #     box.emails(:unread) do |email|
+    #       ... do something with each email...
+    #     end
     #   end
-    def emails(*args)
+    def emails(*args, &block)
       args << :all if args.size == 0
 
       if args.first.is_a?(Symbol) 
@@ -43,9 +45,10 @@ module Gmail
         opts[:attachment] and search.concat ['HAS', 'attachment']
         opts[:search]     and search.concat [opts[:search]]
         
-        @gmail.mailbox(name) do
+        found = @gmail.mailbox(name) do
           @gmail.conn.uid_search(search).collect {|uid| messages[uid] ||= Message.new(self, uid) }
         end
+        block_given? ? found.each(&block) : found
       elsif args.first.is_a?(Hash)
         emails(:all, *args)
       else
@@ -55,6 +58,7 @@ module Gmail
     alias :mails :emails
     alias :search :emails
     alias :find :emails
+    alias :filter :emails
 
     # This is a convenience method that really probably shouldn't need to exist, 
     # but it does make code more readable, if seriously all you want is the count 
@@ -75,7 +79,7 @@ module Gmail
     end
     
     def inspect
-      "#<Gmail::Mailbox name=#{@name}>"
+      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{@name}>"
     end
 
     def to_s

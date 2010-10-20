@@ -1,13 +1,13 @@
 # Gmail gem changelog
 
-## 1.0.0 / Unreleased
+## 0.3.0 / Unreleased
 
 * Refactoring
 * Fixed bugs
 * API improvements
 * Better documentation
 * Code cleanup
-* RSpec for everything (full coverage)
+* RSpec for everything
 
 ## 0.1.1 / 2010-05-11
 
