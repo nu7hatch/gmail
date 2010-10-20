@@ -24,14 +24,14 @@ module Gmail
     
     # Creates given label in your account.
     def create(label)
-      conn.create(label) rescue false
+      !!conn.create(label) rescue false
     end
     alias :new :create
     alias :add :create
     
     # Deletes given label from your account. 
     def delete(label)
-      conn.delete(label) rescue false
+      !!conn.delete(label) rescue false
     end
     alias :remove :delete
     

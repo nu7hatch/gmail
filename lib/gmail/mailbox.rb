@@ -45,12 +45,15 @@ module Gmail
         opts[:attachment] and search.concat ['HAS', 'attachment']
         opts[:search]     and search.concat [opts[:search]]
         
-        found = @gmail.mailbox(name) do
-          @gmail.conn.uid_search(search).collect {|uid| messages[uid] ||= Message.new(self, uid) }
+        @gmail.mailbox(name) do
+          @gmail.conn.uid_search(search).collect do |uid| 
+            message = (messages[uid] ||= Message.new(self, uid))
+            block.call(message) if block_given?
+            message
+          end
         end
-        block_given? ? found.each(&block) : found
       elsif args.first.is_a?(Hash)
-        emails(:all, *args)
+        emails(:all, args.first)
       else
         raise ArgumentError, "Invalid search criteria"
       end

@@ -178,6 +178,27 @@ There is also few shortcuts to mark messages quickly:
     email.star!
     email.unstar!
 
+### Managing labels
+
+With Gmail gem you can also manage your labels. You can get list of defined 
+labels:
+
+    gmail.labels.all
+
+Create new label:
+  
+    gmail.labels.new("Uregent")
+    gmail.labels.add("AnotherOne")
+    
+Remove labels:
+
+    gmail.labels.delete("Uregent")
+    
+Or check if given label exists:
+
+    gmail.labels.exists?("Uregent") # => false
+    gmail.labels.exists?("AnotherOne") # => true
+
 ### Composing and sending emails
 
 Creating emails now uses the amazing [Mail](http://rubygems.org/gems/mail) rubygem. 

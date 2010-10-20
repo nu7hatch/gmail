@@ -159,9 +159,9 @@ module Gmail
     def mailbox(name, &block)
       name = name.to_s
       mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
-      if block_given? and @current_mailbox != name
-        mailbox_stack << name.to_s
-        switch_to_mailbox(name)
+      switch_to_mailbox(name) if @current_mailbox != name
+      if block_given?
+        mailbox_stack << @current_mailbox
         result = block.arity == 1 ? block.call(mailbox) : block.call
         mailbox_stack.pop
         switch_to_mailbox(mailbox_stack.last)
@@ -198,12 +198,12 @@ module Gmail
     private
     
     def switch_to_mailbox(mailbox)
-      connection.select(mailbox) if mailbox
+      conn.select(mailbox) if mailbox
       @current_mailbox = mailbox
     end
     
     def mailbox_stack
-      @mailbox_stack || []
+      @mailbox_stack ||= []
     end
     
     def smtp_settings
