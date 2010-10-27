@@ -1,6 +1,11 @@
 # Gmail gem changelog
 
-## 0.3.0 / Unreleased
+## 0.3.1
+
+* Added envelope fetching
+* Minor bugfixes
+
+## 0.3.0
 
 * Refactoring
 * Fixed bugs
