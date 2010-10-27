@@ -30,8 +30,8 @@ describe "A Gmail mailbox" do
 
     it "should be able to find messages" do
       mock_mailbox do |mailbox|
-        message  = mailbox.emails.first
-        mailbox.emails(:all, :from => message.from.first) == message.from.first
+        message = mailbox.emails.first
+        mailbox.emails(:all, :from => message.from.first.name) == message.from.first.name
       end
     end
   end
