@@ -2,8 +2,8 @@ module Gmail
   class Mailbox
     MAILBOX_ALIASES = {
       :all    => ['ALL'],
-      :unread => ['UNSEEN'],
-      :read   => ['SEEN']
+      :unread => ['UNSEEN', 'UNREAD'],
+      :read   => ['SEEN', 'READ']
     }
   
     attr_reader :name
