@@ -2,13 +2,7 @@ require 'spec_helper'
 
 describe "A Gmail mailbox" do
   subject { Gmail::Mailbox }
-  
-  def within_gmail(&block) 
-    gmail = Gmail.connect!(*TEST_ACCOUNT)
-    yield(gmail)
-    gmail.logout if gmail
-  end
-  
+
   context "on initialize" do
     it "should set client and name" do
       within_gmail do |gmail|
@@ -17,7 +11,7 @@ describe "A Gmail mailbox" do
         mailbox.name.should == "TEST"
       end
     end
-    
+
     it "should work in INBOX by default" do
       within_gmail do |gmail|
         mailbox = subject.new(@gmail)
@@ -25,24 +19,20 @@ describe "A Gmail mailbox" do
       end
     end
   end
-  
+
   context "instance" do
-    def mock_mailbox(box="INBOX", &block)
-      within_gmail do |gmail|
-        mailbox = subject.new(gmail, box)
-        yield(mailbox) if block_given?
-        mailbox
-      end
-    end
-    
+
     it "should be able to count all emails" do
       mock_mailbox do |mailbox|
         mailbox.count.should > 0
       end
     end
-    
+
     it "should be able to find messages" do
-      pending
+      mock_mailbox do |mailbox|
+        message  = mailbox.emails.first
+        mailbox.emails(:all, :from => message.from.first) == message.from.first
+      end
     end
   end
 end
