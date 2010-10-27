@@ -122,15 +122,27 @@ module Gmail
     end
     
     def method_missing(meth, *args, &block)
-      # Delegate rest directly to the message.  
-      message.send(meth, *args, &block)
+      # Delegate rest directly to the message.
+      if envelope.respond_to?(meth)
+        envelope.send(meth, *args, &block)
+      elsif message.respond_to?(meth)
+        message.send(meth, *args, &block)
+      else
+        super(meth, *args, &block)
+      end
     end
     
+    def envelope
+      @envelope ||= @gmail.mailbox(@mailbox.name) {
+        @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"]
+      }
+    end
+
     private
     
     def message
       @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
-        @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"] # RFC822
+        @gmail.conn.uid_fetch(uid, "RFC822")[0].attr["RFC822"] # RFC822
       })
     end
   end # Message
