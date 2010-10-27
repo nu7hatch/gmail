@@ -130,7 +130,7 @@ module Gmail
     
     def message
       @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
-        @gmail.conn.uid_fetch(uid, "RFC822")[0].attr["RFC822"] 
+        @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"] # RFC822
       })
     end
   end # Message
