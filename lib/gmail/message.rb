@@ -68,6 +68,7 @@ module Gmail
     def delete!
       @mailbox.messages.delete(uid)
       flag(:Deleted)
+      move_to('[Gmail]/Trash')
     end
 
     # Archive this message.
