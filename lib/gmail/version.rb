@@ -1,9 +1,9 @@
 module Gmail
   class Version #:nodoc:
-    STRING = File.open(File.join(File.dirname(__FILE__), "../../VERSION")).read.strip
-    MAJOR  = STRING.split(".")[0]
-    MINOR  = STRING.split(".")[1]
-    TINY   = STRING.split(".")[2]
+    MAJOR  = 0
+    MINOR  = 3
+    PATCH  = 2
+    STRING = [MINOR, MAJOR, PATCH].join('.')
   end # Version
   
   def self.version # :nodoc:

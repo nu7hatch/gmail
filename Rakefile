@@ -1,52 +1,45 @@
-#!/usr/bin/env ruby
-
-require 'rubygems'
-
-begin
-  require 'jeweler'
-  
-  Jeweler::Tasks.new do |gem|
-    gem.name = "gmail"
-    gem.summary = %Q{A Rubyesque interface to Gmail, with all the tools you'll need.}
-    gem.description = <<-DESCR
-      A Rubyesque interface to Gmail, with all the tools you'll need. Search, 
-      read and send multipart emails; archive, mark as read/unread, delete emails; 
-      and manage labels.
-    DESCR
-    gem.email = "kriss.kowalik@gmail.com"
-    gem.homepage = "http://github.com/nu7hatch/gmail"
-    gem.authors = ["BehindLogic", "Kriss 'nu7hatch' Kowalik"]
-    gem.add_dependency 'mime', '>= 0.1'
-    gem.add_dependency 'mail', '>= 2.2.1'
-    gem.add_development_dependency 'rspec', '~> 2.0'
-    gem.add_development_dependency 'mocha', '>= 0.9'
-  end
-  Jeweler::GemcutterTasks.new
-rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
-end
-
+# -*- ruby -*-
+$:.unshift(File.expand_path('../lib', __FILE__))
+require 'gmail/version'
 require 'rspec/core/rake_task'
+require 'rake/rdoctask'
+
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.pattern = 'spec/**/*_spec.rb'
-  t.rspec_opts = %q[--colour --backtrace]
+  t.rspec_opts = %q[-c -b]
 end
 
 RSpec::Core::RakeTask.new(:rcov) do |t|
   t.rcov = true
-  t.rspec_opts = %q[--colour --backtrace]
-  t.rcov_opts = %q[--exclude "spec" --text-report]
+  t.rspec_opts = %q[-c -b]
+  t.rcov_opts = %q[-T -x "spec"]
 end
 
-task :spec => :check_dependencies
-task :rcov => :check_dependencies
-task :default => :spec
-
-require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "Ruby GMail #{version}"
+  rdoc.title = "Gmail #{Gmail.version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+task :default => :spec
+
+desc "Build current version as a rubygem"
+task :build do
+  `gem build gmail.gemspec`
+  `mkdir -p pkg`
+  `mv gmail-*.gem pkg/`
+end
+
+desc "Relase current version to rubygems.org"
+task :release => :build do
+  `git tag -am "Version bump to #{Gmail.version}" v#{Gmail.version}`
+  `git push origin master`
+  `git push origin master --tags`
+  `gem push pkg/gmail-#{Gmail.version}.gem`
+end
+
+desc "Perform installation via rubygems"
+task :install => :build do
+  `gem install pkg/gmail-#{Gmail.version}.gem`
 end
