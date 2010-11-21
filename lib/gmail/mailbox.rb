@@ -2,8 +2,20 @@ module Gmail
   class Mailbox
     MAILBOX_ALIASES = {
       :all    => ['ALL'],
-      :unread => ['UNSEEN'], #'UNREAD'],
-      :read   => ['SEEN'], #'READ']
+      :unseen => ['UNSEEN'],
+      :seen   => ['SEEN'],
+      :unread => ['UNSEEN'], # not IMAP standard but common usage
+      :read   => ['SEEN'], # not IMAP standard but common usage
+      :flagged => ['FLAGGED'],
+      :unflagged => ['UNFLAGGED'],
+      :starred => ['FLAGGED'], # not IMAP standard, but Gmail slang
+      :unstarred => ['UNFLAGGED'], # not IMAP standard, but Gmail slang
+      :deleted => ['DELETED'],
+      :undeleted => ['UNDELETED'],
+      :draft => ['DRAFT'],
+      :draft => ['UNDRAFT']
+      # According to http://mail.google.com/support/bin/answer.py?hl=en&answer=78761, ANSWERED and RECENT are not supported
+      # There are more flags, e.g. new which resolves to RECENT UNSEEN and is probably unsupported - need to try.
     }
   
     attr_reader :name
