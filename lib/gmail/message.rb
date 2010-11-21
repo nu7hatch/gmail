@@ -132,7 +132,17 @@ module Gmail
         super(meth, *args, &block)
       end
     end
-    
+
+    def respond_to?(meth, *args, &block)
+      if envelope.respond_to?(meth)
+        return true
+      elsif message.respond_to?(meth)
+        return true
+      else
+        super(meth, *args, &block)
+      end
+    end
+
     def envelope
       @envelope ||= @gmail.mailbox(@mailbox.name) {
         @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"]
