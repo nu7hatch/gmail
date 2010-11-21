@@ -104,7 +104,7 @@ module Gmail
       name
     end
 
-    MAILBOX_ALIASES.each { |mailbox|
+    MAILBOX_ALIASES.each_key { |mailbox|
       define_method(mailbox) do |*args, &block|
         emails(mailbox, *args, &block)
       end
