@@ -102,7 +102,6 @@ module Gmail
     rescue Net::IMAP::NoResponseError
       raise NoLabelError, "Label '#{name}' doesn't exist!"
     end
-    alias :add_label :label
 
     # Mark this message with given label. When given label doesn't exist then
     # it will be automaticaly created. 
@@ -114,7 +113,8 @@ module Gmail
       @gmail.labels.add(name)
       label!(name, from)
     end
-    alias :add_label! :add_label
+    alias :add_label :label!
+    alias :add_label! :label!
     
     # Remove given label from this message. 
     def remove_label!(name)
