@@ -1,9 +1,19 @@
 module Gmail
   class Mailbox
     MAILBOX_ALIASES = {
-      :all    => ['ALL'],
-      :unread => ['UNSEEN'], #'UNREAD'],
-      :read   => ['SEEN'], #'READ']
+      :all       => ['ALL'],
+      :seen      => ['SEEN'],
+      :unseen    => ['UNSEEN'],
+      :read      => ['SEEN'],
+      :unread    => ['UNSEEN'],
+      :flagged   => ['FLAGGED'],
+      :unflagged => ['UNFLAGGED'],
+      :starred   => ['FLAGGED'],
+      :unstarred => ['UNFLAGGED'], 
+      :deleted   => ['DELETED'],
+      :undeleted => ['UNDELETED'],
+      :draft     => ['DRAFT'],
+      :undrafted => ['UNDRAFT']
     }
   
     attr_reader :name
@@ -78,7 +88,7 @@ module Gmail
 
     # This permanently removes messages which are marked as deleted
     def expunge
-      @gmail.conn.expunge
+      @gmail.mailbox(name) { @gmail.conn.expunge }
     end
 
     # Cached messages. 
@@ -93,5 +103,11 @@ module Gmail
     def to_s
       name
     end
+
+    MAILBOX_ALIASES.each { |mailbox|
+      define_method(mailbox) do |*args, &block|
+        emails(mailbox, *args, &block)
+      end
+    }
   end # Message
 end # Gmail
