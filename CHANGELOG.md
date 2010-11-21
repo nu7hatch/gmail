@@ -1,5 +1,9 @@
 # Gmail gem changelog
 
+## 0.3.4
+
+* Fixes in mailbox filters shortcuts (Thanks Benjamin Bock)
+
 ## 0.3.3
 
 * Added #expunge to Mailbox (Thanks Benjamin Bock)
