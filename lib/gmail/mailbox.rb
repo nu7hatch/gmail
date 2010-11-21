@@ -76,6 +76,11 @@ module Gmail
       emails(*args).size
     end
 
+    # This permanently removes messages which are marked as deleted
+    def expunge
+      @gmail.conn.expunge
+    end
+
     # Cached messages. 
     def messages
       @messages ||= {}
