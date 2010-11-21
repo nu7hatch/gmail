@@ -1,5 +1,6 @@
 module Gmail
   class Labels
+    include Enumerable
     attr_reader :connection
     alias :conn :connection
      
@@ -15,6 +16,11 @@ module Gmail
       end
     end
     alias :list :all
+    alias :to_a :all
+
+    def each(*args, &block)
+      all.each(*args, &block)
+    end
     
     # Returns +true+ when given label defined. 
     def exists?(label)
