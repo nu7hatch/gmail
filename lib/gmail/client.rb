@@ -157,7 +157,7 @@ module Gmail
     #     ...
     #   end
     def mailbox(name, &block)
-      name = name.to_s
+      name = Net::IMAP.encode_utf7(name.to_s)
       mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
       switch_to_mailbox(name) if @current_mailbox != name
       if block_given?

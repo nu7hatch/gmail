@@ -17,9 +17,11 @@ module Gmail
     }
   
     attr_reader :name
+    attr_reader :external_name
 
     def initialize(gmail, name="INBOX")
       @name  = name
+      @external_name = Net::IMAP.decode_utf7(name)
       @gmail = gmail
     end
 
@@ -97,7 +99,7 @@ module Gmail
     end
     
     def inspect
-      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{@name}>"
+      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{external_name}>"
     end
 
     def to_s

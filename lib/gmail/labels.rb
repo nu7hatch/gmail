@@ -11,7 +11,7 @@ module Gmail
     # Get list of all defined labels.
     def all
       (conn.list("", "%")+conn.list("[Gmail]/", "%")).inject([]) do |labels,label|
-        label[:name].each_line {|l| labels << l }
+        label[:name].each_line {|l| labels << Net::IMAP.decode_utf7(l) }
         labels 
       end
     end
@@ -24,20 +24,20 @@ module Gmail
     
     # Returns +true+ when given label defined. 
     def exists?(label)
-      all.include?(label)
+      all.include?(Net::IMAP.encode_utf7(label))
     end
     alias :exist? :exists?
     
     # Creates given label in your account.
     def create(label)
-      !!conn.create(label) rescue false
+      !!conn.create(Net::IMAP.encode_utf7(label)) rescue false
     end
     alias :new :create
     alias :add :create
     
     # Deletes given label from your account. 
     def delete(label)
-      !!conn.delete(label) rescue false
+      !!conn.delete(Net::IMAP.encode_utf7(label)) rescue false
     end
     alias :remove :delete
     
