@@ -68,7 +68,7 @@ module Gmail
     def delete!
       @mailbox.messages.delete(uid)
       flag(:Deleted)
-      move_to('[Gmail]/Trash')
+      move_to('[Gmail]/Trash') unless %w[[Gmail]/Spam [Gmail]/Trash].include?(@mailbox.name)
     end
 
     # Archive this message.
