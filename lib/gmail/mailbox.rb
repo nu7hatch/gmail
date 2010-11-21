@@ -32,7 +32,7 @@ module Gmail
       args << :all if args.size == 0
 
       if args.first.is_a?(Symbol) 
-        search = MAILBOX_ALIASES[args.shift]
+        search = MAILBOX_ALIASES[args.shift].dup
         opts = args.first.is_a?(Hash) ? args.first : {}
         
         opts[:after]      and search.concat ['SINCE', opts[:after].to_imap_date]
