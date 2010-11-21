@@ -2,8 +2,8 @@
 
 ## 0.3.3
 
-* Added #expunge to Mailbox (Thanks bb)
-* Added more mailbox filters (Thanks bb)
+* Added #expunge to Mailbox (Thanks Benjamin Bock)
+* Added more mailbox filters (Thanks Benjamin Bock)
 * Added shortcuts for mailbox filters
 * Minor bugfixes
 
