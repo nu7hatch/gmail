@@ -78,7 +78,7 @@ module Gmail
 
     # This permanently removes messages which are marked as deleted
     def expunge
-      @gmail.conn.expunge
+      @gmail.mailbox(name) { @gmail.conn.expunge }
     end
 
     # Cached messages. 
