@@ -1,6 +1,13 @@
 # Gmail gem changelog
 
-## 0.3.1
+## 0.3.3
+
+* Added #expunge to Mailbox (Thanks bb)
+* Added more mailbox filters (Thanks bb)
+* Added shortcuts for mailbox filters
+* Minor bugfixes
+
+## 0.3.2
 
 * Added envelope fetching
 * Minor bugfixes
