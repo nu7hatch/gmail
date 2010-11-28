@@ -64,11 +64,14 @@ module Gmail
       unflag('[Gmail]/Starred')
     end
     
-    # Move to trash.
+    # Move to trash / bin.
     def delete!
       @mailbox.messages.delete(uid)
-      flag(:Deleted)
-      move_to('[Gmail]/Trash') unless %w[[Gmail]/Spam [Gmail]/Trash].include?(@mailbox.name)
+      flag(:deleted)
+
+      # For some, it's called "Trash", for others, it's called "Bin". Support both.
+      trash =  @gmail.labels.exist?('[Gmail]/Bin') ? '[Gmail]/Bin' : '[Gmail]/Trash'
+      move_to(trash) unless %w[[Gmail]/Spam [Gmail]/Bin [Gmail]/Trash].include?(@mailbox.name)
     end
 
     # Archive this message.
