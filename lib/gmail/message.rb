@@ -81,7 +81,8 @@ module Gmail
     
     # Move to given box and delete from others.  
     def move_to(name, from=nil)
-      label(name, from) && delete!
+      label(name, from)
+      delete! if !%w[[Gmail]/Bin [Gmail]/Trash].include?(name)
     end
     alias :move :move_to
     
