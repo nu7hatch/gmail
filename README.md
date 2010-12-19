@@ -14,6 +14,8 @@ API, is well tested, better documented and have many other improvements.
 
 Extra thanks for specific feature contributions from:
 
+* [Stefano Bernardi](http://githu.com/stefanobernardi)
+* [Benjamin Bock](http://github.com/bb)
 * [Arthur Chiu](http://github.com/achiu)
 * [Justin Perkins](http://github.com/justinperkins)
 * [Mikkel Malmberg](http://github.com/mikker)

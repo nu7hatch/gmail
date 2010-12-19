@@ -1,5 +1,11 @@
 # Gmail gem changelog
 
+## 0.4.0
+
+* Added XOAUTH authentication method (Thanks Stefano Bernardi)
+* Separated clients
+* Fixed specs
+
 ## 0.3.4
 
 * Fixes in mailbox filters shortcuts (Thanks Benjamin Bock)
