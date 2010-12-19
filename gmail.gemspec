@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency     'mime',  ['>= 0.1']
   s.add_runtime_dependency     'mail',  ['>= 2.2.1']
+  s.add_runtime_dependency     'oauth', ['>= 0.3.6']
   s.add_development_dependency 'rspec', ['~> 2.0']
   s.add_development_dependency 'mocha', ['>= 0.9']
 end
