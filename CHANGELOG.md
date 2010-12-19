@@ -2,7 +2,7 @@
 
 ## 0.4.0
 
-* Added XOAUTH authentication method (Thanks Stefano Bernardi)
+* Added XOAUTH authentication method (Thanks Stefano Bernardi and Nicolas Fouché)
 * Separated clients
 * Fixed specs
 
