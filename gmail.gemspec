@@ -15,9 +15,9 @@ Gem::Specification.new do |s|
   s.require_paths    = %w[lib]
   s.extra_rdoc_files = %w[LICENSE README.md CHANGELOG.md TODO.md]
 
-  s.add_runtime_dependency     'mime',  ['>= 0.1']
-  s.add_runtime_dependency     'mail',  ['>= 2.2.1']
-  s.add_runtime_dependency     'oauth', ['>= 0.3.6']
-  s.add_development_dependency 'rspec', ['~> 2.0']
-  s.add_development_dependency 'mocha', ['>= 0.9']
+  s.add_runtime_dependency     'mime', '>= 0.1'
+  s.add_runtime_dependency     'mail', '>= 2.2.1'
+  s.add_runtime_dependency     'gmail_xoauth', '>= 0.3.0'
+  s.add_development_dependency 'rspec', '~> 2.0'
+  s.add_development_dependency 'mocha', '>= 0.9'
 end

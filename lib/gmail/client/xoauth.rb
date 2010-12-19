@@ -1,3 +1,5 @@
+require 'gmail_xoauth'
+
 module Gmail
   module Client
     class XOAuth < Base
