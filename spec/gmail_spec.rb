@@ -8,14 +8,14 @@ describe "Any object" do
   %w[new new!].each do |method|
     it "##{method} should properly connect with GMail service and return valid connection object" do
       gmail = Gmail.send(method, *TEST_ACCOUNT)
-      gmail.should be_kind_of(Gmail::Client)
+      gmail.should be_kind_of(Gmail::Client::IMAP)
       gmail.connection.should_not be_nil
       gmail.should be_logged_in
     end
     
     it "##{method} should connect with client and give it context when block given" do
       Gmail.send(method, *TEST_ACCOUNT) do |gmail|
-        gmail.should be_kind_of(Gmail::Client)
+        gmail.should be_kind_of(Gmail::Client::IMAP)
         gmail.connection.should_not be_nil
         gmail.should be_logged_in
       end
