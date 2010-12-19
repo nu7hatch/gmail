@@ -8,11 +8,11 @@ module Gmail
     class DeliveryError < ArgumentError; end
     
     autoload :Base,   'gmail/client/base'
-    autoload :IMAP,   'gmail/client/imap'
+    autoload :Plain,  'gmail/client/plain'
     autoload :XOAuth, 'gmail/client/xoauth'
 
-    def self.new_imap(*args)
-      Gmail::Client::IMAP.new(*args)
+    def self.new_plain(*args)
+      Gmail::Client::Plain.new(*args)
     end
 
     def self.new_xoauth(*args)

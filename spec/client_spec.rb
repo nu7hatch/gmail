@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe "Gmail client (IMAP)" do
-  subject { Gmail::Client::IMAP }
+describe "Gmail client (Plain)" do
+  subject { Gmail::Client::Plain }
   
   context "on initialize" do
     it "should set username, password and options" do
@@ -19,7 +19,7 @@ describe "Gmail client (IMAP)" do
   
   context "instance" do
     def mock_client(&block) 
-      client = Gmail::Client::IMAP.new(*TEST_ACCOUNT)
+      client = Gmail::Client::Plain.new(*TEST_ACCOUNT)
       if block_given?
         client.connect
         yield client
@@ -45,7 +45,7 @@ describe "Gmail client (IMAP)" do
     
     it "should raise error when given GMail account is invalid and errors enabled" do
       lambda {
-        client = Gmail::Client::IMAP.new("foo", "bar")
+        client = Gmail::Client::Plain.new("foo", "bar")
         client.connect.should be_true
         client.login!.should_not be_true
       }.should raise_error(Gmail::Client::AuthorizationError)
@@ -53,7 +53,7 @@ describe "Gmail client (IMAP)" do
     
     it "shouldn't login when given GMail account is invalid" do
       lambda {
-        client = Gmail::Client::IMAP.new("foo", "bar")
+        client = Gmail::Client::Plain.new("foo", "bar")
         client.connect.should be_true
         client.login.should_not be_true
       }.should_not raise_error(Gmail::Client::AuthorizationError)
@@ -137,7 +137,7 @@ describe "Gmail client (IMAP)" do
     
     context "labels" do
       subject { 
-        client = Gmail::Client::IMAP.new(*TEST_ACCOUNT)
+        client = Gmail::Client::Plain.new(*TEST_ACCOUNT)
         client.connect
         client.labels
       }

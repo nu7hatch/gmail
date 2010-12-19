@@ -23,6 +23,27 @@ module Gmail
 
   class << self
 
+    # Creates new Gmail connection using given authorization options.
+    #
+    # ==== Examples
+    #
+    #   Gmail.new(:plain, "foo@gmail.com", "password")
+    #   Gmail.new(:xoauth, "foo@gmail.com", 
+    #     :consumer_key => "",
+    #     :consumer_secret => "",
+    #     :token => "",
+    #     :secret => "")
+    #
+    # To use plain authentication mehod you can also call:
+    #
+    #   Gmail.new("foo@gmail.com", "password")
+    #
+    # You can also use block-style call:
+    #
+    #   Gmail.new("foo@gmail.com", "password") do |client|
+    #     # ...
+    #   end
+    #
     def new(*args, &block)
       client = connect_with_proper_client(*args)
       client.connect and client.login
@@ -43,7 +64,7 @@ module Gmail
       if args.first.is_a?(Symbol)        
         login_method = args.shift  
       else
-        login_method ||= :imap
+        login_method ||= :plain
       end
 
       Client.send("new_#{login_method}", *args)
