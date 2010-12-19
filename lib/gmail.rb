@@ -22,26 +22,40 @@ module Gmail
   autoload :Message, "gmail/message"
 
   class << self
-    def new(username, password, options={}, &block)
-      client = Client.new(username, password, options)
+
+    def new(*args, &block)
+      client = connect_with_proper_client(*args)
       client.connect and client.login
-      if block_given?
-        yield client
-        client.logout
-      end
-      client
+      perform_block(client, &block)
     end
     alias :connect :new
-    
-    def new!(username, password, options={}, &block)
-      client = Client.new(username, password, options)
+
+    def new!(*args, &block)
+      client = connect_with_proper_client(*args)
       client.connect! and client.login!
+      perform_block(client, &block)
+    end
+    alias :connect! :new!
+    
+    protected
+
+    def connect_with_proper_client(*args)
+      if args.first.is_a?(Symbol)        
+        login_method = args.shift  
+      else
+        login_method ||= :imap
+      end
+
+      Client.send("new_#{login_method}", *args)
+    end
+
+    def perform_block(client, &block)
       if block_given?
         yield client
         client.logout
       end
       client
     end
-    alias :connect! :new!
+
   end # << self
 end # Gmail
