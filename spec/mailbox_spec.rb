@@ -34,5 +34,15 @@ describe "A Gmail mailbox" do
         mailbox.emails(:all, :from => message.from.first.name) == message.from.first.name
       end
     end
+    
+    it "should be able to do a full text search of message bodies" do
+      mock_mailbox do |mailbox|
+        message = mailbox.emails.first
+        body = message.parts.blank? ? message.body.decoded : message.parts[0].body.decoded
+        emails = mailbox.emails(:search => body.split(' ').first)
+        emails.size > 0
+      end
+    end
+    
   end
 end
