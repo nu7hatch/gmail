@@ -8,7 +8,7 @@ module Gmail
       attr_reader :consumer_key
       attr_reader :consumer_secret
 
-      def initialize(username, token, secret, options={})
+      def initialize(username, options={})
         @token           = options.delete(:token)
         @secret          = options.delete(:secret)
         @consumer_key    = options.delete(:consumer_key)
