@@ -153,7 +153,6 @@ module Gmail
       }
     end
 
-    private
     
     def message
       @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
