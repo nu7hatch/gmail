@@ -87,6 +87,21 @@ You can also check if you are logged in at any time:
       gmail.logged_in?
     end
 
+### XOAuth authentication
+
+From v0.4.0 it's possible to authenticate to your Gmail account using XOAuth
+method. It's very simple:
+
+    gmail = Gmail.connect(:xoauth, 
+      :token           => 'TOKEN',
+      :secret          => 'TOKEN_SECRET',
+      :consumer_key    => 'CONSUMER_KEY',
+      :consumer_secret => 'CONSUMER_SECRET'
+    )
+    
+For more information check out the [gmail_xoauth](https://github.com/nfo/gmail_xoauth)
+gem from Nicolas Fouché.
+
 ### Counting and gathering emails
     
 Get counts for messages in the inbox:
@@ -223,9 +238,9 @@ email either, because ruby-gmail will set it for you.
       add_file "/path/to/some_image.jpg"
     end
 
-Or, generate the message first and send it later
+Or, compose the message first and send it later
 
-    email = gmail.generate_message do
+    email = gmail.compose do
       to "email@example.com"
       subject "Having fun in Puerto Rico!"
       body "Spent the day on the road..."
