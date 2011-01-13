@@ -1,3 +1,5 @@
+require 'thread'
+
 module Gmail
   module Client
     class Base
@@ -13,9 +15,10 @@ module Gmail
       attr_reader :options
       
       def initialize(username, options={})
-        defaults  = {}
-        @username = fill_username(username)
-        @options  = defaults.merge(options)
+        defaults       = {}
+        @username      = fill_username(username)
+        @options       = defaults.merge(options)
+        @mailbox_mutex = Mutex.new
       end
       
       # Connect to gmail service. 
@@ -96,6 +99,7 @@ module Gmail
         elsif !mail 
           mail = Mail.new
         end 
+
         mail.delivery_method(*smtp_settings)
         mail.from = username unless mail.from
         mail
@@ -147,17 +151,21 @@ module Gmail
       #     ...
       #   end
       def mailbox(name, &block)
-        name = Net::IMAP.encode_utf7(name.to_s)
-        mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
-        switch_to_mailbox(name) if @current_mailbox != name
-        if block_given?
-          mailbox_stack << @current_mailbox
-          result = block.arity == 1 ? block.call(mailbox) : block.call
-          mailbox_stack.pop
-          switch_to_mailbox(mailbox_stack.last)
-          return result
+        @mailbox_mutex.synchronize do
+          name = Net::IMAP.encode_utf7(name.to_s)
+          mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
+          switch_to_mailbox(name) if @current_mailbox != name
+
+          if block_given?
+            mailbox_stack << @current_mailbox
+            result = block.arity == 1 ? block.call(mailbox) : block.call
+            mailbox_stack.pop
+            switch_to_mailbox(mailbox_stack.last)
+            return result
+          end
+
+          return mailbox
         end
-        mailbox
       end
       alias :in_mailbox :mailbox
       alias :in_label :mailbox
@@ -198,14 +206,14 @@ module Gmail
       
       def smtp_settings
         [:smtp, {
-           :address => GMAIL_SMTP_HOST,
-           :port => GMAIL_SMTP_PORT,
-           :domain => mail_domain,
-           :user_name => username,
-           :password => password,
-           :authentication => 'plain',
-           :enable_starttls_auto => true
-         }]
+          :address => GMAIL_SMTP_HOST,
+          :port => GMAIL_SMTP_PORT,
+          :domain => mail_domain,
+          :user_name => username,
+          :password => password,
+          :authentication => 'plain',
+          :enable_starttls_auto => true
+        }]
       end
     end # Base
   end # Client
