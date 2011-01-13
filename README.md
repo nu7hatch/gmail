@@ -14,6 +14,8 @@ API, is well tested, better documented and have many other improvements.
 
 Extra thanks for specific feature contributions from:
 
+* [abhishiv](http://github.com/abhishiv)
+* [Michael Young](http://github.com/myoung8)
 * [Nicolas Fouché](http://github.com/nfo)
 * [Stefano Bernardi](http://github.com/stefanobernardi)
 * [Benjamin Bock](http://github.com/bb)
@@ -89,7 +91,7 @@ You can also check if you are logged in at any time:
 
 ### XOAuth authentication
 
-From v0.4.0 it's possible to authenticate to your Gmail account using XOAuth
+From v0.4.0 it's possible to authenticate with your Gmail account using XOAuth
 method. It's very simple:
 
     gmail = Gmail.connect(:xoauth, 
