@@ -152,12 +152,13 @@ module Gmail
         @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"]
       }
     end
-
     
     def message
       @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
         @gmail.conn.uid_fetch(uid, "RFC822")[0].attr["RFC822"] # RFC822
       })
     end
+    alias_method :raw_message, :message
+
   end # Message
 end # Gmail

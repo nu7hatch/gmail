@@ -56,7 +56,9 @@ module Gmail
         opts[:label]      and search.concat ['LABEL', opts[:label]]
         opts[:attachment] and search.concat ['HAS', 'attachment']
         opts[:search]     and search.concat ['BODY', opts[:search]]
-        
+        opts[:body]       and search.concat ['BODY', opts[:body]]
+        opts[:query]      and search.concat opts[:query]
+
         @gmail.mailbox(name) do
           @gmail.conn.uid_search(search).collect do |uid| 
             message = (messages[uid] ||= Message.new(self, uid))
