@@ -94,7 +94,7 @@ You can also check if you are logged in at any time:
 From v0.4.0 it's possible to authenticate with your Gmail account using XOAuth
 method. It's very simple:
 
-    gmail = Gmail.connect(:xoauth, 
+    gmail = Gmail.connect(:xoauth, "email@domain.com", 
       :token           => 'TOKEN',
       :secret          => 'TOKEN_SECRET',
       :consumer_key    => 'CONSUMER_KEY',
