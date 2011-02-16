@@ -10,7 +10,8 @@ module Gmail
     
     # Get list of all defined labels.
     def all
-      (conn.list("", "%")+conn.list("[Gmail]/", "%")).inject([]) do |labels,label|
+      # conn.list("[Gmail]/", "%") returns nil for non-english accounts
+      (conn.list("", "%") + conn.list("[Gmail]/", "%").to_a).inject([]) do |labels,label|
         label[:name].each_line {|l| labels << Net::IMAP.decode_utf7(l) }
         labels 
       end

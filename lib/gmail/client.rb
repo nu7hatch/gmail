@@ -3,7 +3,13 @@ module Gmail
     # Raised when connection with GMail IMAP service couldn't be established. 
     class ConnectionError < SocketError; end
     # Raised when given username or password are invalid.
-    class AuthorizationError < Net::IMAP::NoResponseError; end
+    class AuthorizationError < Net::IMAP::NoResponseError
+      # NoResponseError require a Response object to create
+      def initialize(response, message)
+        response.data.text = message
+        super response
+      end
+    end
     # Raised when delivered email is invalid. 
     class DeliveryError < ArgumentError; end
     
