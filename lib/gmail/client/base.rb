@@ -152,7 +152,7 @@ module Gmail
       #   end
       def mailbox(name, &block)
         @mailbox_mutex.synchronize do
-          name = Net::IMAP.encode_utf7(name.to_s)
+          name = name.to_s
           mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
           switch_to_mailbox(name) if @current_mailbox != name
 
@@ -196,7 +196,10 @@ module Gmail
       private
       
       def switch_to_mailbox(mailbox)
-        conn.select(mailbox) if mailbox
+        if mailbox
+          mailbox = Net::IMAP.encode_utf7(mailbox)
+          conn.select(mailbox)
+        end
         @current_mailbox = mailbox
       end
       
