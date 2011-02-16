@@ -24,7 +24,7 @@ module Gmail
     
     # Returns +true+ when given label defined. 
     def exists?(label)
-      all.include?(Net::IMAP.encode_utf7(label))
+      all.include?(label)
     end
     alias :exist? :exists?
     
