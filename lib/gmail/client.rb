@@ -1,6 +1,8 @@
-require 'gmail_xoauth'
-
 module Gmail
+  autoload :Connection, 'gmail/connection/connection'
+  autoload :PlainConnection, 'gmail/connection/plain_connection'
+  autoload :XOAuthConnection, 'gmail/connection/xoauth_connection'
+    
   class Client
     # Raised when connection with GMail IMAP service couldn't be established. 
     class ConnectionError < SocketError; end
@@ -16,102 +18,25 @@ module Gmail
       end
     end
     
-    # GMail IMAP defaults
-    GMAIL_IMAP_HOST = 'imap.gmail.com'
-    GMAIL_IMAP_PORT = 993
-    
-    # GMail SMTP defaults
-    GMAIL_SMTP_HOST = "smtp.gmail.com"
-    GMAIL_SMTP_PORT = 587
-    
-    attr_reader :username, :options, :password, :xoauth
-    def initialize(username, password, options = {})
-      @username = username =~ /@/ ? username : "#{username}@gmail.com"
-      @password = password
-      @options = options
-      @xoauth = @options.include?(:xoauth) ? @options.delete(:xoauth) : {}
-      @logged_in = false
-    end
-    
-    # Connect to gmail service. 
-    def connect(raise_errors=false)
-      @imap = Net::IMAP.new(GMAIL_IMAP_HOST, GMAIL_IMAP_PORT, true, nil, false)
-    rescue SocketError
-      raise_errors and raise ConnectionError, "Couldn't establish connection with GMail IMAP service"
-    end
-    
-    # This version of connect will raise error on failure...
-    def connect!
-      connect(true)
-    end
-    
-    # Login to specified account.
-    def login(raise_errors = false)
-      return if @imap.nil?
+    attr_reader :connection
+    def initialize(*args)
+      raise AgumentError, 'wrong number of arguments' if args.length < 2
       
-      if @xoauth.empty? then
-        login = @imap.login(username, password)
-        @logged_in = login.name == 'OK'
+      username = args[0]
+      password = args[1].is_a?(String) ? args[1] : ''
+      options = args.last.is_a?(Hash) ? args.last : {}
+      
+      if options.include?(:xoauth) then
+        @connection = Gmail::XOAuthConnection.new(username, options)
       else
-        login = @imap.authenticate('XOAUTH', username,
-                                    :consumer_key    => @xoauth[:consumer_key],
-                                    :consumer_secret => @xoauth[:consumer_secret],
-                                    :token           => @xoauth[:token],
-                                    :token_secret    => @xoauth[:token_secret])
-        @logged_in = login.name == 'OK'
+        @connection = Gmail::PlainConnection.new(username, password, options)
       end
-    rescue Net::IMAP::NoResponseError => e
-      raise_errors and raise AuthorizationError.new(e.response, "Couldn't login to given Gmail account: #{username}")
+      self
     end
     
-    # This version of login will raise error on failure...
-    def login!
-      login(true)
-    end
-    
-    # Logout from Gmail service. 
-    def logout
-      @imap && logged_in? and @imap.logout
-    ensure
-      @logged_in = false
-    end
-    
-    # Returns +true+ when you are logged in to specified account.
-    def logged_in?
-      return @logged_in
-    end
-    
-    private
-    def mail_domain
-      username.split('@')[0]
-    end
-    
-    def smtp_settings
-      if @xoauth.empty? then
-        [:smtp, {
-          :address => GMAIL_SMTP_HOST,
-          :port => GMAIL_SMTP_PORT,
-          :domain => mail_domain,
-          :user_name => username,
-          :password => password,
-          :authentication => 'plain',
-          :enable_starttls_auto => true
-        }]
-      else
-        [:smtp, {
-           :address => GMAIL_SMTP_HOST,
-           :port => GMAIL_SMTP_PORT,
-           :domain => mail_domain,
-           :user_name => username,
-           :password => secret = {
-             :consumer_key    => @xoauth[:consumer_key],
-             :consumer_secret => @xoauth[:consumer_secret],
-             :token           => @xoauth[:token],
-             :token_secret    => @xoauth[:token_secret]
-           },
-           :authentication => :xoauth,
-           :enable_starttls_auto => true
-         }]
+    %w[login login! connect connect! logout logged_in? username password].each do |method|
+      define_method method do |*args|
+        @connection.send(method, *args)
       end
     end
   end # Client

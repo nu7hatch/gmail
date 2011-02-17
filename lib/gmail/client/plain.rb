@@ -5,9 +5,10 @@ module Gmail
       
       def initialize(username, password, options={})
         @password = password
+        @authentication = 'plain'
         super(username, options)
       end
-
+      
       def login(raise_errors=false)
         @imap and @logged_in = (login = @imap.login(username, password)) && login.name == 'OK'
       rescue Net::IMAP::NoResponseError => e

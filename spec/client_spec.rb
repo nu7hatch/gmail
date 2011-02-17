@@ -7,7 +7,7 @@ describe "Gmail client" do
       client = subject.new("test@gmail.com", "pass", :foo => :bar)
       client.username.should == "test@gmail.com"
       client.password.should == "pass"
-      client.options[:foo].should == :bar
+      client.connection.options[:foo].should == :bar
     end
     
     it "should convert simple username to Gmail email" do
@@ -16,22 +16,22 @@ describe "Gmail client" do
     end
     
     it "should detect :xoauth option" do
-      client = subject.new("foo@gmail.com", "", :xoauth => { :consumer_key => "",
+      client = subject.new("foo@gmail.com", :xoauth => { :consumer_key => "",
                   :consumer_secret => "",
                   :token => "",
                   :secret => "" })
-      client.xoauth.should_not be_nil
-      client.options.should be_empty
+      client.connection.authentication.should == :xoauth
+      client.connection.options.should be_empty
     end
 
     it "should detect :xoauth option and keep other options" do
-      client = subject.new("foo@gmail.com", "", :foo => :bar, :xoauth => { :consumer_key => "",
+      client = subject.new("foo@gmail.com", :foo => :bar, :xoauth => { :consumer_key => "",
                   :consumer_secret => "",
                   :token => "",
                   :secret => "" })
-      client.xoauth.should_not be_nil
-      client.options.should_not be_empty
-      client.options[:foo].should == :bar
+      client.connection.authentication.should == :xoauth
+      client.connection.options.should_not be_empty
+      client.connection.options[:foo].should == :bar
     end
     
     it "should not login on initialize" do
