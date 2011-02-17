@@ -46,6 +46,13 @@ module Gmail
       @labels ||= Labels.new(connection.imap)
     end
     
+    # Return mailbox object for given name.
+    %w[mailbox mailbox!].each do |method|
+      define_method(method) do |*args|
+        labels.send(method, *args)
+      end
+    end
+    
     def inspect
       "#<Gmail::Client#{'0x%04x' % (object_id << 1)} (#{username}) #{'dis' if !logged_in?}connected>"
     end

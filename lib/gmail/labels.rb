@@ -26,6 +26,7 @@ module Gmail
     def exists?(label)
       all.include?(label)
     end
+    alias :exist? :exists?
     
     # Creates given label in your account.
     def create(label)
@@ -38,6 +39,19 @@ module Gmail
       !!imap.delete(Net::IMAP.encode_utf7(label)) rescue false
     end
     alias :remove :delete
+    
+    # Returns a mailbox object for the given name.
+    # Creates it if not exists.
+    def mailbox(name="INBOX")
+      create(name)
+      Mailbox.new(imap, name)
+    end
+    
+    # This version will raise a error if the given mailbox name not exists.
+    def mailbox!(name="INBOX")
+      raise KeyError, "mailbox #{name} not found" unless exist?(name)
+      Mailbox.new(imap, name)
+    end
     
     def inspect
       "#<Gmail::Labels#{'0x%04x' % (object_id << 1)}>"

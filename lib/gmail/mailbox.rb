@@ -15,16 +15,14 @@ module Gmail
       :draft     => ['DRAFT'],
       :undrafted => ['UNDRAFT']
     }
-  
-    attr_reader :name
-    attr_reader :external_name
-
-    def initialize(gmail, name="INBOX")
+    
+    attr_reader :name, :imap_name
+    def initialize(imap, name="INBOX")
       @name  = name
-      @external_name = Net::IMAP.decode_utf7(name)
-      @gmail = gmail
+      @imap_name = Net::IMAP.encode_utf7(name)
+      @imap = imap
     end
-
+    
     # Returns list of emails which meets given criteria. 
     #
     # ==== Examples
@@ -113,5 +111,5 @@ module Gmail
         emails(mailbox, *args, &block)
       end
     }
-  end # Message
+  end # Mailbox
 end # Gmail

@@ -18,7 +18,7 @@ module Gmail
   autoload :Version, "gmail/version"
   autoload :Client,  "gmail/client"
   autoload :Labels,  "gmail/labels"
-  # autoload :Mailbox, "gmail/mailbox"
+  autoload :Mailbox, "gmail/mailbox"
   # autoload :Message, "gmail/message"
   
   class << self

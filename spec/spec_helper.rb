@@ -3,7 +3,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'rubygems'
 require 'rspec'
-#require 'mocha'
 require 'yaml'
 require 'gmail'
 
@@ -15,6 +14,16 @@ def within_gmail(&block)
   gmail = Gmail.connect!(*TEST_ACCOUNT)
   yield(gmail)
   gmail.logout if gmail
+end
+
+def mock_client(&block) 
+  Gmail.connect(*TEST_ACCOUNT) do |client|
+    if block_given?
+      yield client
+      client.logout
+    end
+  end
+  client
 end
 
 def mock_mailbox(box="INBOX", &block)
