@@ -8,5 +8,5 @@ module Gmail
   
   def self.version # :nodoc:
     Version::STRING
-  end 
+  end
 end # Gmail

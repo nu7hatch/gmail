@@ -17,26 +17,21 @@ end
 module Gmail
   autoload :Version, "gmail/version"
   autoload :Client,  "gmail/client"
-  autoload :Labels,  "gmail/labels"
-  autoload :Mailbox, "gmail/mailbox"
-  autoload :Message, "gmail/message"
-
+  # autoload :Labels,  "gmail/labels"
+  # autoload :Mailbox, "gmail/mailbox"
+  # autoload :Message, "gmail/message"
+  
   class << self
-
-    # Creates new Gmail connection using given authorization options.
+    
+    # Creates new Gmail client using given authorization information.
     #
     # ==== Examples
     #
-    #   Gmail.new(:plain, "foo@gmail.com", "password")
-    #   Gmail.new(:xoauth, "foo@gmail.com", 
-    #     :consumer_key => "",
-    #     :consumer_secret => "",
-    #     :token => "",
-    #     :secret => "")
-    #
-    # To use plain authentication mehod you can also call:
-    #
     #   Gmail.new("foo@gmail.com", "password")
+    #   Gmail.connect("foo@gmail.com", :xoauth => { :consumer_key => "",
+    #       :consumer_secret => "",
+    #       :token => "",
+    #       :secret => "" })
     #
     # You can also use block-style call:
     #
@@ -45,31 +40,26 @@ module Gmail
     #   end
     #
     def new(*args, &block)
-      client = connect_with_proper_client(*args)
-      client.connect and client.login
+      client = Client.new(*args)
       perform_block(client, &block)
     end
-    alias :connect :new
-
-    def new!(*args, &block)
-      client = connect_with_proper_client(*args)
-      client.connect! and client.login!
+    
+    # Creates new Gmail client and login using given authorization infomation.
+    def connect(*args, &block)
+      client = Client.new(*args)
+      client.login()
       perform_block(client, &block)
     end
-    alias :connect! :new!
+    
+    # This version of connect will raise error on failure...
+    def connect!(*args, &block)
+      client = Client.new(*args)
+      client.login!()
+      perform_block(client, &block)
+    end
     
     protected
-
-    def connect_with_proper_client(*args)
-      if args.first.is_a?(Symbol)        
-        login_method = args.shift  
-      else
-        login_method ||= :plain
-      end
-
-      Client.send("new_#{login_method}", *args)
-    end
-
+    
     def perform_block(client, &block)
       if block_given?
         yield client
@@ -77,6 +67,5 @@ module Gmail
       end
       client
     end
-
   end # << self
 end # Gmail
