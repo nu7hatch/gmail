@@ -27,6 +27,12 @@ module Gmail
       connect(true)
     end
     
+    # Return internal IMAP object. Login automaticaly to specified account if necessary.
+    def imap
+      login and at_exit { logout } unless logged_in?
+      @imap
+    end
+    
     # Login to specified account.
     def login(*args)
       raise NotImplementedError, "The `#{self.class.name}#login` method is not implemented."

@@ -39,5 +39,15 @@ module Gmail
         @connection.send(method, *args)
       end
     end
+    
+    # Return labels object, which helps you with managing Gmail labels or mailboxes.
+    # See <tt>Gmail::Labels</tt> for details.
+    def labels
+      @labels ||= Labels.new(connection.imap)
+    end
+    
+    def inspect
+      "#<Gmail::Client#{'0x%04x' % (object_id << 1)} (#{username}) #{'dis' if !logged_in?}connected>"
+    end
   end # Client
 end # Gmail

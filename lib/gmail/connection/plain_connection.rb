@@ -13,5 +13,5 @@ module Gmail
     rescue Net::IMAP::NoResponseError => e
       raise_errors and raise Gmail::Client::AuthorizationError.new(e.response, "Couldn't login to given Gmail account: #{username}")
     end
-  end
-end
+  end # PlainConnection
+end # Gmail
