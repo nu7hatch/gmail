@@ -16,11 +16,11 @@ module Gmail
       :undrafted => ['UNDRAFT']
     }
     
-    attr_reader :name, :imap_name
-    def initialize(imap, name="INBOX")
+    attr_reader :name, :imap_name, :controller
+    def initialize(controller, name="INBOX")
       @name  = name
       @imap_name = Net::IMAP.encode_utf7(name)
-      @imap = imap
+      @controller = controller
     end
     
     # Returns list of emails which meets given criteria. 
@@ -39,9 +39,9 @@ module Gmail
     #     end
     #   end
     def emails(*args, &block)
-      args << :all if args.size == 0
-
-      if args.first.is_a?(Symbol) 
+      args << :all if args.size.zero?
+      
+      if args.first.is_a?(Symbol)
         search = MAILBOX_ALIASES[args.shift].dup
         opts = args.first.is_a?(Hash) ? args.first : {}
         
@@ -56,9 +56,9 @@ module Gmail
         opts[:search]     and search.concat ['BODY', opts[:search]]
         opts[:body]       and search.concat ['BODY', opts[:body]]
         opts[:query]      and search.concat opts[:query]
-
-        @gmail.mailbox(name) do
-          @gmail.conn.uid_search(search).collect do |uid| 
+        
+        controller.switch_to_mailbox(name) do
+          controller.uid_search(search).collect do |uid| 
             message = (messages[uid] ||= Message.new(self, uid))
             block.call(message) if block_given?
             message
@@ -70,11 +70,8 @@ module Gmail
         raise ArgumentError, "Invalid search criteria"
       end
     end
-    alias :mails :emails
-    alias :search :emails
     alias :find :emails
-    alias :filter :emails
-
+    
     # This is a convenience method that really probably shouldn't need to exist, 
     # but it does make code more readable, if seriously all you want is the count 
     # of messages.
@@ -84,32 +81,33 @@ module Gmail
     #   gmail.inbox.count(:all)
     #   gmail.inbox.count(:unread, :from => "friend@gmail.com")
     #   gmail.mailbox("Test").count(:all, :after => Time.now-(20*24*3600))
+    #
     def count(*args)
       emails(*args).size
     end
-
+    
     # This permanently removes messages which are marked as deleted
     def expunge
-      @gmail.mailbox(name) { @gmail.conn.expunge }
+      controller.switch_to_mailbox(name) { controller.expunge }
     end
-
-    # Cached messages. 
+    
+    # Cached messages.
     def messages
       @messages ||= {}
     end
     
     def inspect
-      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{external_name}>"
+      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{name}>"
     end
-
+    
     def to_s
       name
     end
-
-    MAILBOX_ALIASES.each_key { |mailbox|
+    
+    MAILBOX_ALIASES.each_key do |mailbox|
       define_method(mailbox) do |*args, &block|
         emails(mailbox, *args, &block)
       end
-    }
+    end
   end # Mailbox
 end # Gmail

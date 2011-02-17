@@ -40,16 +40,16 @@ module Gmail
       end
     end
     
-    # Return labels object, which helps you with managing Gmail labels or mailboxes.
-    # See <tt>Gmail::Labels</tt> for details.
-    def labels
-      @labels ||= Labels.new(connection.imap)
+    # Return a mailbox controller object, which helps you with managing Gmail labels or mailboxes.
+    # See <tt>Gmail::MailboxController</tt> for details.
+    def mailbox_controller
+      @mailbox_controller ||= MailboxController.new(connection.imap)
     end
     
     # Return mailbox object for given name.
     %w[mailbox mailbox!].each do |method|
       define_method(method) do |*args|
-        labels.send(method, *args)
+        mailbox_controller.send(method, *args)
       end
     end
     

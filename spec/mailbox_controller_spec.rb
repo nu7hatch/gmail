@@ -1,52 +1,52 @@
 require 'spec_helper.rb'
 
-describe "Gmail labels" do
+describe "Gmail mailbox controller" do
   context "instance" do
     subject {
       client = Gmail::Client.new(*TEST_ACCOUNT)
       client.connect
-      client.labels
+      client.mailbox_controller
     }
     
     it "should get list of all available labels" do
-      labels = subject
-      labels.all.should include("INBOX")
+      mailbox_controller = subject
+      mailbox_controller.all.should include("INBOX")
     end
     
     it "should be able to check if there is given label defined" do
-      labels = subject
-      labels.exists?("INBOX").should be_true
-      labels.exists?("FOOBAR").should be_false
+      mailbox_controller = subject
+      mailbox_controller.exists?("INBOX").should be_true
+      mailbox_controller.exists?("FOOBAR").should be_false
     end
     
     it "should be able to create given label" do
-      labels = subject
-      labels.create("MYLABEL")
-      labels.exists?("MYLABEL").should be_true
-      labels.create("MYLABEL").should be_false
-      labels.delete("MYLABEL")
+      mailbox_controller = subject
+      mailbox_controller.create("MYLABEL")
+      mailbox_controller.exists?("MYLABEL").should be_true
+      mailbox_controller.create("MYLABEL").should be_false
+      mailbox_controller.delete("MYLABEL")
     end
     
     it "should be able to remove existing label" do
-      labels = subject
-      labels.create("MYLABEL")
-      labels.delete("MYLABEL").should be_true
-      labels.exists?("MYLABEL").should be_false
-      labels.delete("MYLABEL").should be_false
+      mailbox_controller = subject
+      mailbox_controller.create("MYLABEL")
+      mailbox_controller.delete("MYLABEL").should be_true
+      mailbox_controller.exists?("MYLABEL").should be_false
+      mailbox_controller.delete("MYLABEL").should be_false
     end
     
     it "should be able to create label with non-ascii characters" do
-      labels = subject
+      mailbox_controller = subject
       name = Net::IMAP.decode_utf7("TEST &APYA5AD8-") # TEST äöü
-      labels.create(name)
-      labels.delete(name).should be_true
-      labels.exists?(name).should be_false
-      labels.delete(name).should be_false
+      mailbox_controller.create(name)
+      mailbox_controller.delete(name).should be_true
+      mailbox_controller.exists?(name).should be_false
+      mailbox_controller.delete(name).should be_false
     end
   end
   
   context "mailboxes" do
-    subject { Gmail.connect(*TEST_ACCOUNT).labels }
+    subject { Gmail.connect(*TEST_ACCOUNT).mailbox_controller }
     
     %w[mailbox mailbox!].each do |method|
       it "##{method} should return INBOX if no name was given" do

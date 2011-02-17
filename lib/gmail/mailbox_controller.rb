@@ -1,10 +1,13 @@
+require 'thread'
+
 module Gmail
-  class Labels
+  class MailboxController
     include Enumerable
     
     attr_reader :imap
     def initialize(imap)
       @imap = imap
+      @mailbox_mutex = Mutex.new
     end
     
     # Get list of all defined labels.
@@ -40,6 +43,11 @@ module Gmail
     end
     alias :remove :delete
     
+    # Cached mailboxes.
+    def mailboxes
+      @mailboxes ||= {}
+    end
+    
     # Returns a mailbox object for the given name.
     # Creates it if not exists.
     def mailbox(name="INBOX")
@@ -53,8 +61,42 @@ module Gmail
       Mailbox.new(imap, name)
     end
     
-    def inspect
-      "#<Gmail::Labels#{'0x%04x' % (object_id << 1)}>"
+    # Switch to a given mailbox.
+    def switch_to_mailbox(name, &block)
+      @mailbox_mutex.synchronize do
+        mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
+        _switch_to_mailbox(name) if @current_mailbox != name
+        
+        if block_given?
+          mailbox_stack << @current_mailbox
+          result = block.arity == 1 ? block.call(mailbox) : block.call
+          mailbox_stack.pop
+          _switch_to_mailbox(mailbox_stack.last)
+          return result
+        end
+        
+        return mailbox
+      end
     end
-  end # Labels
+    
+    %w[uid_search expunge].each do |method|
+      define_method(method) do |*args|
+        imap.send(method, *args)
+      end
+    end
+    
+    def inspect
+      "#<Gmail::MailboxController#{'0x%04x' % (object_id << 1)}>"
+    end
+    
+    private
+    def _switch_to_mailbox(mailbox)
+      imap.select(Net::IMAP.encode_utf7(mailbox)) if mailbox
+      @current_mailbox = mailbox
+    end
+    
+    def mailbox_stack
+      @mailbox_stack ||= []
+    end
+  end # MailboxController
 end # Gmail

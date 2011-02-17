@@ -23,13 +23,12 @@ def mock_client(&block)
       client.logout
     end
   end
-  client
 end
 
-def mock_mailbox(box="INBOX", &block)
-  within_gmail do |gmail|
-    mailbox = subject.new(gmail, box)
-    yield(mailbox) if block_given?
+def mock_mailbox(box="[Google Mail]/Alle Nachrichten", &block)
+  mock_client do |client|
+    mailbox = subject.new(client.mailbox_controller, box)
+    yield mailbox if block_given?
     mailbox
   end
 end
