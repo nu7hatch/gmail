@@ -40,17 +40,17 @@ describe "Gmail" do
     end
     
     it "#connect should not raise error when couldn't login to given account" do
-      # lambda {
-      #   gmail = Gmail.connect("foo", "bar")
-      #   gmail.should_not be_logged_in
-      # }.should_not raise_error(Gmail::Client::AuthorizationError)
+      lambda {
+        gmail = Gmail.connect("foo", "bar")
+        gmail.should_not be_logged_in
+      }.should_not raise_error(Gmail::Client::AuthorizationError)
     end
     
     it "#connect! should raise error when couldn't login to given account" do
-      # lambda {
-      #   gmail = Gmail.connect("foo", "bar")
-      #   gmail.should_not be_logged_in
-      # }.should raise_error(Gmail::Client::AuthorizationError)
+      lambda {
+        gmail = Gmail.connect!("foo", "bar")
+        gmail.should_not be_logged_in
+      }.should raise_error(Gmail::Client::AuthorizationError)
     end
   end
 end

@@ -47,6 +47,7 @@ module Gmail
     # Creates new Gmail client and login using given authorization infomation.
     def connect(*args, &block)
       client = Client.new(*args)
+      client.connect()
       client.login()
       perform_block(client, &block)
     end
@@ -54,6 +55,7 @@ module Gmail
     # This version of connect will raise error on failure...
     def connect!(*args, &block)
       client = Client.new(*args)
+      client.connect!()
       client.login!()
       perform_block(client, &block)
     end

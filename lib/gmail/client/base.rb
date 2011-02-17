@@ -22,7 +22,7 @@ module Gmail
       end
       
       # Connect to gmail service. 
-      def connect(raise_errors=false)
+      def connect(raise_errors = false)
         @imap = Net::IMAP.new(GMAIL_IMAP_HOST, GMAIL_IMAP_PORT, true, nil, false)
       rescue SocketError
         raise_errors and raise ConnectionError, "Couldn't establish connection with GMail IMAP service"
@@ -205,15 +205,32 @@ module Gmail
       end
       
       def smtp_settings
-        [:smtp, {
-          :address => GMAIL_SMTP_HOST,
-          :port => GMAIL_SMTP_PORT,
-          :domain => mail_domain,
-          :user_name => username,
-          :password => password,
-          :authentication => 'plain',
-          :enable_starttls_auto => true
-        }]
+        if @xoauth.empty? then
+          [:smtp, {
+            :address => GMAIL_SMTP_HOST,
+            :port => GMAIL_SMTP_PORT,
+            :domain => mail_domain,
+            :user_name => username,
+            :password => password,
+            :authentication => 'plain',
+            :enable_starttls_auto => true
+          }]
+        else
+          [:smtp, {
+             :address => GMAIL_SMTP_HOST,
+             :port => GMAIL_SMTP_PORT,
+             :domain => mail_domain,
+             :user_name => username,
+             :password => secret = {
+               :consumer_key    => consumer_key,
+               :consumer_secret => consumer_secret,
+               :token           => token,
+               :token_secret    => token_secret
+             },
+             :authentication => :xoauth,
+             :enable_starttls_auto => true
+           }]
+        end
       end
     end # Base
   end # Client
