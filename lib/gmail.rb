@@ -23,7 +23,8 @@ module Gmail
   
   class << self
     
-    # Creates new Gmail client using given authorization information.
+    # Create new Gmail client using given authorization information.
+    # A client created with <tt>Gmail#new</tt> does not connect and login by default.
     #
     # ==== Examples
     #
@@ -44,7 +45,7 @@ module Gmail
       perform_block(client, &block)
     end
     
-    # Creates new Gmail client and login using given authorization infomation.
+    # Create new Gmail client and login using given authorization infomation.
     def connect(*args, &block)
       client = Client.new(*args)
       client.connect()

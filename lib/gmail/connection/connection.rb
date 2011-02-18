@@ -15,7 +15,7 @@ module Gmail
       @logged_in = false
     end
     
-    # Connect to gmail service. 
+    # Connect to gmail service.
     def connect(raise_errors=false)
       @imap = Net::IMAP.new(GMAIL_IMAP_HOST, GMAIL_IMAP_PORT, true, nil, false)
     rescue SocketError
@@ -43,14 +43,14 @@ module Gmail
       login(true)
     end
     
-    # Logout from Gmail service. 
+    # Logout from Gmail service.
     def logout
       @imap && logged_in? and @imap.logout
     ensure
       @logged_in = false
     end
     
-    # Returns +true+ when you are logged in to specified account.
+    # Return +true+ when you are logged in to specified account.
     def logged_in?
       return @logged_in
     end

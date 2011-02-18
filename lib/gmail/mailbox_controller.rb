@@ -4,17 +4,17 @@ module Gmail
   class MailboxController
     include Enumerable
     
-    attr_reader :imap
-    def initialize(imap)
-      @imap = imap
+    attr_reader :client
+    def initialize(client)
+      @client = client
       @mailbox_mutex = Mutex.new
     end
     
     # Get list of all defined labels.
     def all
-      labels = imap.list("", "%") # search first level labels.
+      labels = client.imap.list("", "%") # search first level labels.
       gmail_mailboxes = labels.select {|l| l.attr.include?(:Haschildren)}
-      gmail_mailboxes.each {|l| labels += imap.list("#{l.name}#{l.delim}", "%").to_a}
+      gmail_mailboxes.each {|l| labels += client.imap.list("#{l.name}#{l.delim}", "%").to_a}
       
       labels.map {|l| Net::IMAP.decode_utf7(l.name)}
     end
@@ -33,13 +33,13 @@ module Gmail
     
     # Creates given label in your account.
     def create(label)
-      !!imap.create(Net::IMAP.encode_utf7(label)) rescue false
+      !!client.imap.create(Net::IMAP.encode_utf7(label)) rescue false
     end
     alias :add :create
     
     # Deletes given label from your account. 
     def delete(label)
-      !!imap.delete(Net::IMAP.encode_utf7(label)) rescue false
+      !!client.imap.delete(Net::IMAP.encode_utf7(label)) rescue false
     end
     alias :remove :delete
     
@@ -52,13 +52,13 @@ module Gmail
     # Creates it if not exists.
     def mailbox(name="INBOX")
       create(name)
-      Mailbox.new(imap, name)
+      Mailbox.new(client.imap, name)
     end
     
     # This version will raise a error if the given mailbox name not exists.
     def mailbox!(name="INBOX")
       raise KeyError, "mailbox #{name} not found" unless exist?(name)
-      Mailbox.new(imap, name)
+      Mailbox.new(client.imap, name)
     end
     
     # Switch to a given mailbox.
@@ -81,7 +81,7 @@ module Gmail
     
     %w[uid_search expunge].each do |method|
       define_method(method) do |*args|
-        imap.send(method, *args)
+        client.imap.send(method, *args)
       end
     end
     
@@ -91,7 +91,7 @@ module Gmail
     
     private
     def _switch_to_mailbox(mailbox)
-      imap.select(Net::IMAP.encode_utf7(mailbox)) if mailbox
+      client.imap.select(Net::IMAP.encode_utf7(mailbox)) if mailbox
       @current_mailbox = mailbox
     end
     

@@ -4,9 +4,9 @@ module Gmail
   autoload :XOAuthConnection, 'gmail/connection/xoauth_connection'
     
   class Client
-    # Raised when connection with GMail IMAP service couldn't be established. 
+    # Raised when connection with GMail IMAP service couldn't be established.
     class ConnectionError < SocketError; end
-    # Raised when delivered email is invalid. 
+    # Raised when delivered email is invalid.
     class DeliveryError < ArgumentError; end
     
     # Raised when given username or password are invalid.
@@ -34,19 +34,20 @@ module Gmail
       self
     end
     
-    %w[login login! connect connect! logout logged_in? username password].each do |method|
+    # Make access to methods in connection object.
+    %w[connect connect! login login! logout logged_in? imap username password].each do |method|
       define_method method do |*args|
         @connection.send(method, *args)
       end
     end
     
-    # Return a mailbox controller object, which helps you with managing Gmail labels or mailboxes.
+    # Create and return a mailbox controller object, which helps you with managing Gmail labels or mailboxes.
     # See <tt>Gmail::MailboxController</tt> for details.
     def mailbox_controller
-      @mailbox_controller ||= MailboxController.new(connection.imap)
+      @mailbox_controller ||= MailboxController.new(self)
     end
     
-    # Return mailbox object for given name.
+    # Make access to methods in mailbox controller object.
     %w[mailbox mailbox!].each do |method|
       define_method(method) do |*args|
         mailbox_controller.send(method, *args)

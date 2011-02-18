@@ -8,8 +8,6 @@ module Gmail
       super(username, options)
     end
     
-    
-    
     # Login to specified account.
     def login(raise_errors = false)
       return if @imap.nil?
