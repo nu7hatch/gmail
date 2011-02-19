@@ -21,7 +21,7 @@ describe "A Gmail mailbox" do
   end
   
   context "instance" do
-    subject { Gmail.connect!(*TEST_ACCOUNT).mailbox!("[Google Mail]/Alle Nachrichten") }
+    subject { mock_client.all_mail }
     
     it "should be able to count all emails" do
       subject.count.should > 0

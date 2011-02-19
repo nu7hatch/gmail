@@ -28,6 +28,7 @@ module Gmail
     
     def new(*args)
       raise ArgumentError, "wrong number of arguments" if args.length < 1
+      name = args[1] ||= "INBOX"
       return args[0].mailbox!(name) if args[0].exist?(name)
       
       instance = allocate

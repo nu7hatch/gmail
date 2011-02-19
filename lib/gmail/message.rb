@@ -22,7 +22,7 @@ module Gmail
     
     # Unmark message. 
     def unflag(name)
-      mailbox.uid_store(uid, "-FLAGS", [name]) }
+      mailbox.uid_store(uid, "-FLAGS", [name])
     end
     
     # Do commonly used operations on message. 

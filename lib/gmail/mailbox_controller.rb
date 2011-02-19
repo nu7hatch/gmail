@@ -4,11 +4,26 @@ module Gmail
   class MailboxController
     include Enumerable
     
+    SYSTEM_MAILBOXES_NAME = {
+      #:root => '[Gmail], [Google Mail]',
+      :inbox => 'INBOX',
+      :drafts => 'Drafts, Entw&APw-rfe',
+      :importance => 'Important, Wichtig',
+      :trash => 'Trash, Bin, Papierkorb',
+      :all_mail => 'All Mail, Alle Nachrichten',
+      :sent_mail => 'Sent Mail, Gesendet',
+      :starred => 'Starred, Markiert',
+      :spam => 'Spam'
+    }
+    
     attr_reader :client, :mailboxes
     def initialize(client)
       @client = client
       @mailbox_mutex = Mutex.new
       @mailboxes = load_mailboxes
+      alias_system_mailboxes
+      
+      self
     end
     
     def delim
@@ -60,6 +75,7 @@ module Gmail
     # Returns a mailbox object for the given name.
     # Creates it if not exists.
     def mailbox(name="INBOX", raise_error=false)
+      return @system_mailboxes[name] if name.is_a?(Symbol)
       return mailboxes[name] if mailboxes.key?(name)
       
       raise_error and raise KeyError, "mailbox not found: #{name}"
@@ -110,6 +126,20 @@ module Gmail
       end
       
       mailboxes
+    end
+    
+    SYSTEM_MAILBOXES_NAME.each_key do |k|
+      define_method(k) do
+        @system_mailboxes[k]
+      end
+    end
+    
+    def alias_system_mailboxes
+      @system_mailboxes = {}
+      SYSTEM_MAILBOXES_NAME.each do |k, v|
+        name = labels.find {|l| v.include?(Net::IMAP.encode_utf7(l.split(delim).last))}.to_s
+        @system_mailboxes[k] = mailboxes[name] unless name.empty?
+      end
     end
     
     private

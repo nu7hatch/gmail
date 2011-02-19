@@ -13,7 +13,7 @@ describe "Gmail" do
       gmail.should be_kind_of(Gmail::Client)
     end
     
-    it "#new should give it context when block given" do
+    it "#new should give it context when block is given" do
       Gmail.new(*TEST_ACCOUNT) do |gmail|
         gmail.should be_kind_of(Gmail::Client)
       end
@@ -25,7 +25,7 @@ describe "Gmail" do
     end
   end
   
-  context "connect" do
+  context "when connect" do
     %w[connect connect!].each do |method|
       it "##{method} should return a valid connection object and login" do
         gmail = Gmail.send(method, *TEST_ACCOUNT)

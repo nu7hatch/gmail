@@ -36,7 +36,7 @@ module Gmail
     
     # Make access to methods in connection object.
     %w[connect connect! login login! logout logged_in? imap username password].each do |method|
-      define_method method do |*args|
+      define_method(method) do |*args|
         @connection.send(method, *args)
       end
     end
@@ -51,6 +51,13 @@ module Gmail
     %w[mailbox mailbox!].each do |method|
       define_method(method) do |*args|
         mailbox_controller.send(method, *args)
+      end
+    end
+    
+    # Make access to default mailboxes in mailbox controller object.
+    Gmail::MailboxController::SYSTEM_MAILBOXES_NAME.each_key do |k|
+      define_method(k) do
+        mailbox_controller.send(k)
       end
     end
     
