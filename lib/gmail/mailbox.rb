@@ -16,16 +16,10 @@ module Gmail
       :undrafted => ['UNDRAFT']
     }
     
-    attr_reader :controller, :name, :imap_path, :delim, :parent, :children, :descendants
-    def initialize(controller, name="INBOX", parent=nil)
+    attr_reader :controller, :name
+    def initialize(controller, name="INBOX")
       @controller = controller
-      @name  = name.split(controller.delim).last.strip
-      @imap_path = name
-      @parent = parent
-      
-      @children = controller.load_mailboxes(self).values
-      @descendants = @children.inject([]) {|l, c| (l << c) + c.descendants}
-      
+      @name = name
       self
     end
     
@@ -37,9 +31,20 @@ module Gmail
       instance.send(:initialize, *args)
     end
     
+    # Children mailboxes.
+    def children
+      regexp = Regexp.new("#{Regexp.escape(name + controller.delim)}[^#{Regexp.escape(controller.delim)}]+")
+      controller.mailboxes.select {|k, v| regexp.match(k)}.values
+    end
+    
     # Enumerate for children.
     def each_child(*args, &block)
       children.each(*args, &block)
+    end
+    
+    # All descent mailboxes.
+    def descendants
+      controller.mailboxes.select {|k, v| k.start_with?(name)}.values
     end
     
     # Enumerate for descendants.
@@ -122,7 +127,7 @@ module Gmail
     end
     
     def inspect
-      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{imap_path}>"
+      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{name}>"
     end
     
     def to_s

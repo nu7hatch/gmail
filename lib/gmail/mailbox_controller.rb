@@ -4,12 +4,11 @@ module Gmail
   class MailboxController
     include Enumerable
     
-    attr_reader :client
+    attr_reader :client, :mailboxes
     def initialize(client)
       @client = client
       @mailbox_mutex = Mutex.new
-      @mailboxes = {}
-      load_mailboxes
+      @mailboxes = load_mailboxes
     end
     
     def delim
@@ -18,18 +17,17 @@ module Gmail
       @delim = "/" 
     end
     
-    # Array of all mailboxes.
-    def mailboxes
-      @mailboxes.values
+    def labels
+      mailboxes.keys
     end
     
     def each(*args, &block)
-      @mailboxes.values(*args, &block)
+      mailboxes.values(*args, &block)
     end
     
     # Return +true+ when given mailbox defined.
     def exist?(name)
-      @mailboxes.key?(name)
+      mailboxes.key?(name)
     end
     alias :exists? :exist?
     
@@ -39,7 +37,7 @@ module Gmail
       
       path.split(delim).inject("") do |a, b|
         unless @mailboxes.key?(a+delim+b)
-          @mailboxes[a].children = load_mailboxes(@mailboxes[a])
+          mailboxes.merge!(load_mailboxes(@mailboxes[a]))
           return true
         end
         a+b
@@ -52,9 +50,7 @@ module Gmail
     # Delete mailbox with given imap path from your account.
     def delete(path)
       client.imap.delete(Net::IMAP.encode_utf7(path))
-      deleted = @mailboxes.delete(path)
-      deleted.parent.children.delete(deleted) unless deleted.parent.nil?
-      deleted.each_descendant {|d| @mailboxes.delete(d.imap_path)}
+      mailboxes.delete_if {|k, v| k.start_with?(path)}
       return true
     rescue
       return false
@@ -64,11 +60,11 @@ module Gmail
     # Returns a mailbox object for the given name.
     # Creates it if not exists.
     def mailbox(name="INBOX", raise_error=false)
-      return @mailboxes[name] if @mailboxes.key?(name)
+      return mailboxes[name] if mailboxes.key?(name)
       
       raise_error and raise KeyError, "mailbox not found: #{name}"
       create(name)
-      @mailboxes[name]
+      mailboxes[name]
     end
     
     # This version will raise a error if the given mailbox name not exists.
@@ -105,20 +101,21 @@ module Gmail
     
     def load_mailboxes(mailbox=nil)
       mailboxes = {}
-      path = mailbox.nil? ? "" : (mailbox.imap_path + delim)
+      path = mailbox.nil? ? "" : (mailbox.name + delim)
         
       client.imap.list(Net::IMAP.encode_utf7(path), "%").to_a.each do |m|
-        mailboxes[Net::IMAP.decode_utf7(m.name)] ||= Mailbox.new(self, Net::IMAP.decode_utf7(m.name), mailbox)
+        mbox = Mailbox.new(self, Net::IMAP.decode_utf7(m.name))
+        mailboxes[mbox.name] = mbox
+        mailboxes.merge!(load_mailboxes(mbox)) if m.attr.include?(:Haschildren)
       end
       
-      @mailboxes.merge!(mailboxes)
       mailboxes
     end
     
     private
     
     def _switch_to_mailbox(mailbox)
-      client.imap.select(Net::IMAP.encode_utf7(mailbox.imap_path)) if mailbox
+      client.imap.select(Net::IMAP.encode_utf7(mailbox.name)) if mailbox
       @current_mailbox = mailbox
     end
     

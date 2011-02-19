@@ -5,8 +5,7 @@ describe "Gmail mailbox controller" do
   
   context "instance" do
     it "should get list of all available mailboxes" do
-      labels = subject.mailboxes.map {|m| m.imap_path}
-      labels.should include("INBOX")
+      subject.labels.should include("INBOX")
     end
     
     it "should be able to check if a given mailbox defined" do

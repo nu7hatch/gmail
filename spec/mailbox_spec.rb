@@ -6,7 +6,7 @@ describe "A Gmail mailbox" do
     
     it "should set controller and name" do
       mock_client do |client|
-        mailbox = subject.new(client.mailbox_controller, "TEST", nil)
+        mailbox = subject.new(client.mailbox_controller, "TEST")
         mailbox.instance_variable_get("@controller").should == client.mailbox_controller
         mailbox.name.should == "TEST"
       end
