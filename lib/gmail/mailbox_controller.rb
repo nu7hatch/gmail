@@ -35,6 +35,11 @@ module Gmail
     def labels
       mailboxes.keys
     end
+    alias :all_labels :labels
+    
+    def all_mailboxes
+      mailboxes.values
+    end
     
     def each(*args, &block)
       mailboxes.values(*args, &block)
@@ -64,6 +69,9 @@ module Gmail
     
     # Delete mailbox with given imap path from your account.
     def delete(path)
+      # System standard mailboxes cannot be deleted.
+      return false if @system_mailboxes.values.map{|m| m.name}.include?(path)
+      
       client.imap.delete(Net::IMAP.encode_utf7(path))
       mailboxes.delete_if {|k, v| k.start_with?(path)}
       return true

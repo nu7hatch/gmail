@@ -1,15 +1,22 @@
-# GMail for Ruby
+# Gmail for Ruby
 
-A Rubyesque interface to Google's GMail, with all the tools you'll need. Search, 
-read and send multipart emails, archive, mark as read/unread, delete emails, 
-and manage labels.
+A Rubyesque interface to Google's GMail, with all the tools you'll need. 
+Search, read and send multipart emails, archive, mark as read/unread, delete 
+emails, and manage labels.
 
-It's based on Daniel Parker's ruby-gmail gem. This version has more friendy
-API, is well tested, better documented and have many other improvements.  
+It's based on [nu7hatch's gmail](http://github.com/nu7hatch/gmail), which 
+based on
+[Daniel Parker's ruby-gmail gem](https://github.com/dcparker/ruby-gmail). I 
+tried to make some changes in structure of these components but then broke the 
+compatibility with the old version. I will try to keep API changes minimal.
+
+This version has better internal structure, IMO, though. I have also 
+implemented an idea which enable support for Gmail in different languages than 
+English. There are still many things to be done (and tested).
 
 ## Author(s)
 
-* Kriss 'nu7hatch' Kowalik
+* Kriss '[nu7hatch](http://github.com/nu7hatch)' Kowalik
 * [Daniel Parker of BehindLogic.com](http://github.com/dcparker)
 
 Extra thanks for specific feature contributions from:
@@ -30,10 +37,10 @@ Extra thanks for specific feature contributions from:
 You can install it easy using rubygems:
 
     sudo gem install gmail
-    
+
 Or install it manualy:
 
-    git clone git://github.com/nu7hatch/gmail.git
+    git clone git://github.com/ducngtuan/gmail.git
     cd gmail
     rake install
 
@@ -50,8 +57,8 @@ will be installed automatically):
 * Read emails (handles attachments)
 * Emails: label, archive, delete, mark as read/unread/spam, star
 * Manage labels
-* Create and send multipart email messages in plaintext and/or html, with inline 
-  images and attachments
+* Create and send multipart email messages in plaintext and/or html, with 
+  inline images and attachments
 * Utilizes Gmail's IMAP & SMTP, MIME-type detection and parses and generates 
   MIME properly.
 
@@ -69,8 +76,7 @@ This will you automatically log in to your account.
     # play with your gmail...
     gmail.logout
 
-If you pass a block, the session will be passed into the block, and the session 
-will be logged out after the block is executed.
+If you pass a block, the session will be passed into the block, and the session will be logged out after the block is executed.
 
     Gmail.connect(username, password) do |gmail|
       # play with your gmail...
@@ -127,8 +133,8 @@ Browsing labeled emails is similar to work with inbox.
 
     gmail.mailbox('Urgent').count
     
-Getting messages works the same way as counting: Remember that every message in a 
-conversation/thread will come as a separate message.
+Getting messages works the same way as counting: Remember that every message 
+in a conversation/thread will come as a separate message.
 
     gmail.inbox.emails(:unread, :before => Date.parse("2010-04-20"), :from => "myboss@gmail.com")
 
@@ -199,7 +205,10 @@ There is also few shortcuts to mark messages quickly:
     email.star!
     email.unstar!
 
-### Managing labels
+### Managing labels (deprecated)
+
+This section is **deprecated**. See Managing Mailboxes. The old codes, 
+however, still function.
 
 With Gmail gem you can also manage your labels. You can get list of defined 
 labels:
@@ -207,26 +216,53 @@ labels:
     gmail.labels.all
 
 Create new label:
-  
-    gmail.labels.new("Uregent")
+
+    gmail.labels.create("Uregent")
     gmail.labels.add("AnotherOne")
-    
+
 Remove labels:
 
     gmail.labels.delete("Uregent")
-    
+    gmail.labels.remove("AnotherOne")
+
 Or check if given label exists:
 
     gmail.labels.exists?("Uregent") # => false
     gmail.labels.exists?("AnotherOne") # => true
 
+### Managing Mailboxes
+
+Gmail gem defined some standard mailboxes so you can find the mailbox quite 
+easy. The standard mailboxes are `inbox`, `all_mail`, `drafts`, `trash`, `sent_mail`, `importance`, `starred` and `spam`.
+
+    gmail.inbox
+    gmail.all_mail.count
+
+To get list of all mailboxes:
+
+    gmail.all_mailboxes # Array of all Gmail::Mailbox objects
+    gmail.all_labels    # Array of all mailboxes' name
+
+To create a mailbox:
+
+    gmail.mailbox("New mailbox") # not work with gmail.mailbox!
+    gmail.add("AnotherOne")
+    gmail.create("Some other")
+
+Delete a mailboxes:
+
+    gmail.delete("Some boxes")
+    gmail.remove("AnotherOne")
+
+Standard mailboxes like `inbox` or `spam` cannot be deleted.
+
 ### Composing and sending emails
 
-Creating emails now uses the amazing [Mail](http://rubygems.org/gems/mail) rubygem. 
-See its [documentation here](http://github.com/mikel/mail). The Ruby Gmail will 
-automatically configure your Mail emails to be sent via your Gmail account's SMTP, 
-so they will be in your Gmail's "Sent" folder. Also, no need to specify the "From" 
-email either, because ruby-gmail will set it for you.
+Creating emails now uses the amazing [Mail](http://rubygems.org/gems/mail) 
+rubygem. See its [documentation here](http://github.com/mikel/mail). The Ruby 
+Gmail will automatically configure your Mail emails to be sent via your Gmail 
+account's SMTP, so they will be in your Gmail's "Sent" folder. Also, no need 
+to specify the "From" email either, because ruby-gmail will set it for you.
 
     gmail.deliver do
       to "email@example.com"
@@ -256,7 +292,8 @@ Or, compose the message first and send it later
 * Add tests for it. This is important so I don't break it in a
   future version unintentionally.
 * Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+  (if you want to have your own version, that is fine but bump version in a 
+  commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
 
 ## Copyright
@@ -265,4 +302,3 @@ Or, compose the message first and send it later
 * Copyright (c) 2009-2010 BehindLogic
 
 See LICENSE for details.
-

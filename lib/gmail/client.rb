@@ -46,9 +46,10 @@ module Gmail
     def mailbox_controller
       @mailbox_controller ||= MailboxController.new(self)
     end
+    alias :labels :mailbox_controller
     
     # Make access to methods in mailbox controller object.
-    %w[mailbox mailbox!].each do |method|
+    %w[mailbox mailbox! all_mailboxes all_labels add create remove delete].each do |method|
       define_method(method) do |*args|
         mailbox_controller.send(method, *args)
       end

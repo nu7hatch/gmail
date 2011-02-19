@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Gmail::MailboxController, "instance" do
-  subject { @controller ||= mock_client.mailbox_controller }
+  subject { Gmail.connect!(*TEST_ACCOUNT).mailbox_controller }
   
   it "should get list of all available mailboxes" do
     subject.labels.should include("INBOX")

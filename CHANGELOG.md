@@ -1,5 +1,17 @@
 # Gmail gem changelog
 
+## 0.4.1
+
+* Implement supporting for Gmail's default mailboxes in different languages
+* Internal structure changed
+  * Client has a Connection for login and authenticate
+  * Client has a Mailbox Controller for managing mailboxes
+  * Client has a Message Composer for composing and sending message
+  * Mailboxes 
+  * Messages
+  * No more Labels
+* New tests
+
 ## 0.4.0
 
 * Added XOAUTH authentication method (Thanks Stefano Bernardi and Nicolas Fouché)

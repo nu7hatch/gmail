@@ -11,12 +11,12 @@ RSpec.configure do |config|
 end
 
 def mock_client(&block)
-  @client ||= Gmail.connect!(*TEST_ACCOUNT)
+  client = Gmail.connect!(*TEST_ACCOUNT)
   if block_given?
-    yield @client
+    yield client
+    client.logout
   end
-  at_exit { @client.logout }
-  @client
+  client
 end
 alias :within_gmail :mock_client
 
