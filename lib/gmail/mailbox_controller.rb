@@ -8,45 +8,52 @@ module Gmail
     def initialize(client)
       @client = client
       @mailbox_mutex = Mutex.new
+      @mailboxes = {}
+      load_mailboxes
     end
     
-    # Get list of all defined labels.
-    def all
-      labels = client.imap.list("", "%") # search first level labels.
-      gmail_mailboxes = labels.select {|l| l.attr.include?(:Haschildren)}
-      gmail_mailboxes.each {|l| labels += client.imap.list("#{l.name}#{l.delim}", "%").to_a}
-      
-      labels.map {|l| Net::IMAP.decode_utf7(l.name)}
+    # Array of first level mailboxes.
+    def mailboxes
+      @mailboxes.values
     end
-    alias :list :all
-    alias :to_a :all
+    
+    # Array of all mailboxes.
+    def all
+      mailboxes.inject([]) do |list, mailbox|
+        (list << mailbox) + mailbox.descendants
+      end
+    end
     
     def each(*args, &block)
       all.each(*args, &block)
     end
     
-    # Returns +true+ when given label defined. 
-    def exists?(label)
-      all.include?(label)
+    # Return +true+ when given mailbox defined.
+    def exist?(name)
+      not all.detect {|mailbox| mailbox.name == name or mailbox.imap_path == name}.nil?
     end
-    alias :exist? :exists?
+    alias :exists? :exist?
     
-    # Creates given label in your account.
-    def create(label)
-      !!client.imap.create(Net::IMAP.encode_utf7(label)) rescue false
+    # Create mailbox with given path in your account.
+    def create(path)
+      client.imap.create(Net::IMAP.encode_utf7(path))
+      load_mailboxes
+      return true
+    rescue
+      return false
     end
     alias :add :create
     
-    # Deletes given label from your account. 
-    def delete(label)
-      !!client.imap.delete(Net::IMAP.encode_utf7(label)) rescue false
+    # Delete mailbox with given imap path from your account.
+    def delete(path)
+      client.imap.delete(Net::IMAP.encode_utf7(path))
+      deleted = @mailboxes.delete(path)
+      deleted.each_descendant {|d| @mailboxes.delete(d.imap_path)}
+      return true
+    rescue
+      return false
     end
     alias :remove :delete
-    
-    # Cached mailboxes.
-    def mailboxes
-      @mailboxes ||= {}
-    end
     
     # Returns a mailbox object for the given name.
     # Creates it if not exists.
@@ -89,7 +96,20 @@ module Gmail
       "#<Gmail::MailboxController#{'0x%04x' % (object_id << 1)}>"
     end
     
+    def load_mailboxes(mailbox=nil)
+      mailboxes = {}
+      path = mailbox.nil? ? "" : (mailbox.imap_path + mailbox.delim)
+        
+      client.imap.list(Net::IMAP.encode_utf7(path), "%").to_a.each do |m|
+        mailboxes[Net::IMAP.decode_utf7(m.name)] = Mailbox.new(self, m.name, m.delim, mailbox)
+      end
+      
+      @mailboxes.merge!(mailboxes)
+      mailboxes
+    end
+    
     private
+    
     def _switch_to_mailbox(mailbox)
       client.imap.select(Net::IMAP.encode_utf7(mailbox)) if mailbox
       @current_mailbox = mailbox

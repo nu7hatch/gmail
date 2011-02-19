@@ -16,11 +16,33 @@ module Gmail
       :undrafted => ['UNDRAFT']
     }
     
-    attr_reader :name, :imap_name, :controller
-    def initialize(controller, name="INBOX")
-      @name  = name
-      @imap_name = Net::IMAP.encode_utf7(name)
+    attr_reader :controller, :name, :imap_path, :delim, :parent
+    def initialize(controller, name="INBOX", delim="/", parent=nil)
       @controller = controller
+      @name  = name.split(delim).last.strip
+      @imap_path = name
+      @delim = delim
+      @parent = parent
+    end
+    
+    # Return array of children mailboxes.
+    def children
+      @children ||= controller.load_mailboxes(self).values
+    end
+    
+    # Return array of descendants.
+    def descendants
+      children.inject([]) {|l, c| (l << c) + c.descendants}
+    end
+    
+    # Enumerate for children.
+    def each_child(*args, &block)
+      children.each(*args, &block)
+    end
+    
+    # Enumerate for descendants.
+    def each_descendant(*args, &block)
+      descendants.each(*args, &block)
     end
     
     # Returns list of emails which meets given criteria. 
@@ -88,7 +110,7 @@ module Gmail
     
     # This permanently removes messages which are marked as deleted
     def expunge
-      controller.switch_to_mailbox(name) { controller.expunge }
+      controller.switch_to_mailbox(imap_path) { controller.expunge }
     end
     
     # Cached messages.
@@ -97,7 +119,7 @@ module Gmail
     end
     
     def inspect
-      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{name}>"
+      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{imap_path}>"
     end
     
     def to_s
