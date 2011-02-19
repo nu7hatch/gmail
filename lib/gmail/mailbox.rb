@@ -17,11 +17,10 @@ module Gmail
     }
     
     attr_reader :controller, :name, :imap_path, :delim, :parent
-    def initialize(controller, name="INBOX", delim="/", parent=nil)
+    def initialize(controller, name="INBOX", parent=nil)
       @controller = controller
-      @name  = name.split(delim).last.strip
+      @name  = name.split(controller.delim).last.strip
       @imap_path = name
-      @delim = delim
       @parent = parent
     end
     
@@ -32,7 +31,7 @@ module Gmail
     
     # Return array of descendants.
     def descendants
-      children.inject([]) {|l, c| (l << c) + c.descendants}
+      @descendants = children.inject([]) {|l, c| (l << c) + c.descendants}
     end
     
     # Enumerate for children.

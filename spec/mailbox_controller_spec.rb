@@ -30,42 +30,42 @@ describe "Gmail mailbox controller" do
     
     it "should be able to create label with non-ascii characters" do
       name = Net::IMAP.decode_utf7("TEST &APYA5AD8-") # TEST äöü
-      # subject.create(name)
-      # subject.delete(name).should be_true
-      # subject.exists?(name).should be_false
-      # subject.delete(name).should be_false
+      subject.create(name)
+      subject.delete(name).should be_true
+      subject.exists?(name).should be_false
+      subject.delete(name).should be_false
     end
   end
   
-  # context "mailboxes" do
-  #   subject { Gmail.connect(*TEST_ACCOUNT).mailbox_controller }
-  #   
-  #   %w[mailbox mailbox!].each do |method|
-  #     it "##{method} should return INBOX if no name was given" do
-  #       mailbox = subject.send(method)
-  #       mailbox.should be_kind_of(Gmail::Mailbox)
-  #       mailbox.name.should == "INBOX"
-  #     end
-  #     
-  #     it "##{method} should return a mailbox with given name" do
-  #       mailbox = subject.send(method, "TEST")
-  #       mailbox.should be_kind_of(Gmail::Mailbox)
-  #       mailbox.name.should == "TEST"
-  #     end
-  #     
-  #     it "##{method} should return a mailbox with given name using block style" do
-  #       subject.send(method, "TEST") do |mailbox|
-  #         mailbox.should be_kind_of(Gmail::Mailbox)
-  #         mailbox.name.should == "TEST"
-  #       end
-  #     end
-  #   end
-  #   
-  #   it "#mailbox! should raise an error for not existing name" do
-  #     lambda {
-  #       mailbox = subject.mailbox!("FOO")
-  #       mailbox.should_not be_kind_of(Gmail::Mailbox)
-  #     }.should raise_error(KeyError)
-  #   end
-  # end
+  context "mailboxes" do
+    subject { Gmail.connect(*TEST_ACCOUNT).mailbox_controller }
+    
+    %w[mailbox mailbox!].each do |method|
+      it "##{method} should return INBOX if no name was given" do
+        mailbox = subject.send(method)
+        mailbox.should be_kind_of(Gmail::Mailbox)
+        mailbox.name.should == "INBOX"
+      end
+      
+      it "##{method} should return a mailbox with given name" do
+        mailbox = subject.send(method, "TEST")
+        mailbox.should be_kind_of(Gmail::Mailbox)
+        mailbox.name.should == "TEST"
+      end
+      
+      it "##{method} should return a mailbox with given name using block style" do
+        subject.send(method, "TEST") do |mailbox|
+          mailbox.should be_kind_of(Gmail::Mailbox)
+          mailbox.name.should == "TEST"
+        end
+      end
+    end
+    
+    it "#mailbox! should raise an error for not existing name" do
+      lambda {
+        mailbox = subject.mailbox!("FOO")
+        mailbox.should_not be_kind_of(Gmail::Mailbox)
+      }.should raise_error(KeyError)
+    end
+  end
 end

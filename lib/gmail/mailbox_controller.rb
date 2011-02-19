@@ -12,6 +12,12 @@ module Gmail
       load_mailboxes
     end
     
+    def delim
+      @delim ||= client.imap.list("", "%").first.delim
+    rescue
+      @delim = "/" 
+    end
+    
     # Array of first level mailboxes.
     def mailboxes
       @mailboxes.values
@@ -37,8 +43,14 @@ module Gmail
     # Create mailbox with given path in your account.
     def create(path)
       client.imap.create(Net::IMAP.encode_utf7(path))
-      load_mailboxes
-      return true
+      
+      path.split(delim).inject("") do |a, b|
+        unless @mailboxes.key?(a+delim+b)
+          @mailboxes[a].children = load_mailboxes(@mailboxes[a])
+          return true
+        end
+        a+b
+      end
     rescue
       return false
     end
@@ -48,6 +60,7 @@ module Gmail
     def delete(path)
       client.imap.delete(Net::IMAP.encode_utf7(path))
       deleted = @mailboxes.delete(path)
+      deleted.parent.children.delete(deleted) unless deleted.parent.nil?
       deleted.each_descendant {|d| @mailboxes.delete(d.imap_path)}
       return true
     rescue
@@ -57,15 +70,17 @@ module Gmail
     
     # Returns a mailbox object for the given name.
     # Creates it if not exists.
-    def mailbox(name="INBOX")
+    def mailbox(name="INBOX", raise_error=false)
+      return @mailboxes[name] if @mailboxes.key?(name)
+      
+      raise_error and raise KeyError, "mailbox not found: #{name}"
       create(name)
-      Mailbox.new(client.imap, name)
+      @mailboxes[name]
     end
     
     # This version will raise a error if the given mailbox name not exists.
     def mailbox!(name="INBOX")
-      raise KeyError, "mailbox #{name} not found" unless exist?(name)
-      Mailbox.new(client.imap, name)
+      mailbox(name, true)
     end
     
     # Switch to a given mailbox.
@@ -98,10 +113,10 @@ module Gmail
     
     def load_mailboxes(mailbox=nil)
       mailboxes = {}
-      path = mailbox.nil? ? "" : (mailbox.imap_path + mailbox.delim)
+      path = mailbox.nil? ? "" : (mailbox.imap_path + delim)
         
       client.imap.list(Net::IMAP.encode_utf7(path), "%").to_a.each do |m|
-        mailboxes[Net::IMAP.decode_utf7(m.name)] = Mailbox.new(self, m.name, m.delim, mailbox)
+        mailboxes[Net::IMAP.decode_utf7(m.name)] ||= Mailbox.new(self, Net::IMAP.decode_utf7(m.name), mailbox)
       end
       
       @mailboxes.merge!(mailboxes)
