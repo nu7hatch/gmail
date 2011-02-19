@@ -35,7 +35,7 @@ module Gmail
     end
     
     # Make access to methods in connection object.
-    %w[connect connect! login login! logout logged_in? imap username password].each do |method|
+    %w[connect connect! login login! logout logged_in? imap username password smtp_settings authentication].each do |method|
       define_method(method) do |*args|
         @connection.send(method, *args)
       end
@@ -58,6 +58,18 @@ module Gmail
     Gmail::MailboxController::SYSTEM_MAILBOXES_NAME.each_key do |k|
       define_method(k) do
         mailbox_controller.send(k)
+      end
+    end
+    
+    # Create and return a message composer object, which helps you with composing and deliver messages.
+    def message_composer
+      @message_composer ||= MessageComposer.new(self)
+    end
+    
+    # Make access to methods in message composer object.
+    %w[compose message deliver deliver!].each do |method|
+      define_method(method) do |*args, &block|
+        message_composer.send(method, *args, &block)
       end
     end
     

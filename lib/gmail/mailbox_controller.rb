@@ -105,7 +105,8 @@ module Gmail
       end
     end
     
-    %w[uid_search uid_store expunge].each do |method|
+    # Make access to methods in client.imap for convenience.
+    %w[uid_search uid_store uid_copy uid_fetch expunge].each do |method|
       define_method(method) do |*args|
         client.imap.send(method, *args)
       end
@@ -115,6 +116,7 @@ module Gmail
       "#<Gmail::MailboxController#{'0x%04x' % (object_id << 1)}>"
     end
     
+    # Load the hash which contains all the children mailboxes of the given mailbox.
     def load_mailboxes(mailbox=nil)
       mailboxes = {}
       path = mailbox.nil? ? "" : (mailbox.name + delim)
@@ -128,11 +130,14 @@ module Gmail
       mailboxes
     end
     
+    # Define methods to access the system mailboxes, e.g #inbox, #all_mail, #spam...
     SYSTEM_MAILBOXES_NAME.each_key do |k|
       define_method(k) do
         @system_mailboxes[k]
       end
     end
+    
+    private
     
     def alias_system_mailboxes
       @system_mailboxes = {}
@@ -141,8 +146,6 @@ module Gmail
         @system_mailboxes[k] = mailboxes[name] unless name.empty?
       end
     end
-    
-    private
     
     def _switch_to_mailbox(mailbox)
       client.imap.select(Net::IMAP.encode_utf7(mailbox.name)) if mailbox

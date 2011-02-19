@@ -20,6 +20,7 @@ module Gmail
   autoload :MailboxController,  "gmail/mailbox_controller"
   autoload :Mailbox, "gmail/mailbox"
   autoload :Message, "gmail/message"
+  autoload :MessageComposer, "gmail/message_composer"
   
   class << self
     

@@ -39,7 +39,7 @@ module Gmail
     
     # Mark this message as a spam.
     def spam!
-      move_to('[Google Mail]/Spam')
+      move_to(mailbox.controller.spam)
     end
     
     # Mark as read.
@@ -62,53 +62,50 @@ module Gmail
       unflag('[Google Mail]/Starred')
     end
     
-    # Move to trash / bin.
+    # Move to trash.
     def delete!
       mailbox.messages.delete(uid)
       flag(:deleted)
-
-      # For some, it's called "Trash", for others, it's called "Bin". Support both.
-      trash =  @gmail.labels.exist?('[Google Mail]/Bin') ? '[Google Mail]/Bin' : '[Google Mail]/Trash'
-      move_to(trash) unless %w[[Google Mail]/Spam [Google Mail]/Bin [Google Mail]/Trash].include?(@mailbox.name)
-    end
-
-    # Archive this message.
-    def archive!
-      move_to('[Google Mail]/All Mail')
+      move_to(mailbox.controller.trash) unless mailbox == mailbox.controller.trash
     end
     
-    # Move to given box and delete from others.  
+    # Archive this message.
+    def archive!
+      move_to(mailbox.controller.all_mail)
+    end
+    
+    # Move to given box and delete from others.
     def move_to(name, from=nil)
       label(name, from)
-      delete! if !%w[[Google Mail]/Bin [Google Mail]/Trash].include?(name)
+      delete! if mailbox == mailbox.controller.trash
     end
     alias :move :move_to
     
-    # Move message to given and delete from others. When given mailbox doesn't 
-    # exist then it will be automaticaly created. 
+    # Move message to given and delete from others. When given mailbox doesn't
+    # exist then it will be automaticaly created.
     def move_to!(name, from=nil)
       label!(name, from) && delete!
     end
     alias :move! :move_to!
     
     # Mark this message with given label. When given label doesn't exist then
-    # it will raise <tt>NoLabelError</tt>. 
+    # it will raise <tt>NoLabelError</tt>.
     #
     # See also <tt>Gmail::Message#label!</tt>.
     def label(name, from=nil)
-      @gmail.mailbox(Net::IMAP.encode_utf7(from || @mailbox.external_name)) { @gmail.conn.uid_copy(uid, Net::IMAP.encode_utf7(name)) }
+      mailbox.switch_to_mailbox(Net::IMAP.encode_utf7(from.to_s || mailbox.name)) { mailbox.controller.uid_copy(uid, Net::IMAP.encode_utf7(name)) }
     rescue Net::IMAP::NoResponseError
       raise NoLabelError, "Label '#{name}' doesn't exist!"
     end
-
+    
     # Mark this message with given label. When given label doesn't exist then
-    # it will be automaticaly created. 
+    # it will be automaticaly created.
     #
     # See also <tt>Gmail::Message#label</tt>.
     def label!(name, from=nil)
-      label(name, from) 
+      label(name, from)
     rescue NoLabelError
-      @gmail.labels.add(Net::IMAP.encode_utf7(name))
+      name = Mailbox.new(mailbox.controller, name).to_s
       label(name, from)
     end
     alias :add_label :label!
@@ -116,7 +113,7 @@ module Gmail
     
     # Remove given label from this message. 
     def remove_label!(name)
-      move_to('[Google Mail]/All Mail', name)
+      move_to(mailbox.controller.all_mail, name)
     end
     alias :delete_label! :remove_label!
     
@@ -134,7 +131,7 @@ module Gmail
         super(meth, *args, &block)
       end
     end
-
+    
     def respond_to?(meth, *args, &block)
       if envelope.respond_to?(meth)
         return true
@@ -144,19 +141,18 @@ module Gmail
         super(meth, *args, &block)
       end
     end
-
+    
     def envelope
-      @envelope ||= @gmail.mailbox(@mailbox.name) {
-        @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"]
+      @envelope ||= mailbox.controller.switch_to_mailbox(mailbox) {
+        mailbox.controller.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"]
       }
     end
     
     def message
-      @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
-        @gmail.conn.uid_fetch(uid, "RFC822")[0].attr["RFC822"] # RFC822
+      @message ||= Mail.new(mailbox.controller.switch_to_mailbox(mailbox.name) { 
+        mailbox.controller.uid_fetch(uid, "RFC822")[0].attr["RFC822"] # RFC822
       })
     end
     alias_method :raw_message, :message
-
   end # Message
 end # Gmail
