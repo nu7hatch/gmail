@@ -20,6 +20,9 @@ module Gmail
     def initialize(controller, name="INBOX")
       @controller = controller
       @name = name
+      
+      # Add self to controller's list of mailboxes.
+      controller.create(name)
       self
     end
     
@@ -124,6 +127,10 @@ module Gmail
     # Cached messages.
     def messages
       @messages ||= {}
+    end
+    
+    def uid_store(*args)
+      !!controller.switch_to_mailbox(self) { controller.uid_store(*args) }
     end
     
     def inspect

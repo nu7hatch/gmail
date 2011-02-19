@@ -26,8 +26,8 @@ module Gmail
     end
     
     # Return +true+ when given mailbox defined.
-    def exist?(name)
-      mailboxes.key?(name)
+    def exist?(mailbox)
+      mailboxes.key?(mailbox.to_s)
     end
     alias :exists? :exist?
     
@@ -89,7 +89,7 @@ module Gmail
       end
     end
     
-    %w[uid_search expunge].each do |method|
+    %w[uid_search uid_store expunge].each do |method|
       define_method(method) do |*args|
         client.imap.send(method, *args)
       end
@@ -105,7 +105,7 @@ module Gmail
         
       client.imap.list(Net::IMAP.encode_utf7(path), "%").to_a.each do |m|
         mbox = Mailbox.new(self, Net::IMAP.decode_utf7(m.name))
-        mailboxes[mbox.name] = mbox
+        mailboxes[mbox.name] ||= mbox
         mailboxes.merge!(load_mailboxes(mbox)) if m.attr.include?(:Haschildren)
       end
       

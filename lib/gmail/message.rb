@@ -3,28 +3,26 @@ require 'mime/message'
 module Gmail
   class Message
     # Raised when given label doesn't exists.
-    class NoLabelError < Exception; end 
-  
-    attr_reader :uid
+    class NoLabelError < KeyError; end
     
+    attr_reader :uid, :mailbox
     def initialize(mailbox, uid)
       @uid     = uid
       @mailbox = mailbox
-      @gmail   = mailbox.instance_variable_get("@gmail") if mailbox
     end
     
     def uid
-      @uid ||= @gmail.conn.uid_search(['HEADER', 'Message-ID', message_id])[0]
+      @uid ||= mailbox.controller.uid_search(['HEADER', 'Message-ID', message_id])[0]
     end
     
     # Mark message with given flag.
     def flag(name)
-      !!@gmail.mailbox(@mailbox.name) { @gmail.conn.uid_store(uid, "+FLAGS", [name]) }
+      mailbox.uid_store(uid, "+FLAGS", [name])
     end
     
     # Unmark message. 
     def unflag(name)
-      !!@gmail.mailbox(@mailbox.name) { @gmail.conn.uid_store(uid, "-FLAGS", [name]) }
+      mailbox.uid_store(uid, "-FLAGS", [name]) }
     end
     
     # Do commonly used operations on message. 
@@ -41,7 +39,7 @@ module Gmail
     
     # Mark this message as a spam.
     def spam!
-      move_to('[Gmail]/Spam')
+      move_to('[Google Mail]/Spam')
     end
     
     # Mark as read.
@@ -56,33 +54,33 @@ module Gmail
     
     # Mark message with star.
     def star!
-      flag('[Gmail]/Starred')
+      flag('[Google Mail]/Starred')
     end
     
     # Remove message from list of starred.
     def unstar!
-      unflag('[Gmail]/Starred')
+      unflag('[Google Mail]/Starred')
     end
     
     # Move to trash / bin.
     def delete!
-      @mailbox.messages.delete(uid)
+      mailbox.messages.delete(uid)
       flag(:deleted)
 
       # For some, it's called "Trash", for others, it's called "Bin". Support both.
-      trash =  @gmail.labels.exist?('[Gmail]/Bin') ? '[Gmail]/Bin' : '[Gmail]/Trash'
-      move_to(trash) unless %w[[Gmail]/Spam [Gmail]/Bin [Gmail]/Trash].include?(@mailbox.name)
+      trash =  @gmail.labels.exist?('[Google Mail]/Bin') ? '[Google Mail]/Bin' : '[Google Mail]/Trash'
+      move_to(trash) unless %w[[Google Mail]/Spam [Google Mail]/Bin [Google Mail]/Trash].include?(@mailbox.name)
     end
 
     # Archive this message.
     def archive!
-      move_to('[Gmail]/All Mail')
+      move_to('[Google Mail]/All Mail')
     end
     
     # Move to given box and delete from others.  
     def move_to(name, from=nil)
       label(name, from)
-      delete! if !%w[[Gmail]/Bin [Gmail]/Trash].include?(name)
+      delete! if !%w[[Google Mail]/Bin [Google Mail]/Trash].include?(name)
     end
     alias :move :move_to
     
@@ -118,7 +116,7 @@ module Gmail
     
     # Remove given label from this message. 
     def remove_label!(name)
-      move_to('[Gmail]/All Mail', name)
+      move_to('[Google Mail]/All Mail', name)
     end
     alias :delete_label! :remove_label!
     
