@@ -18,25 +18,18 @@ module Gmail
       @delim = "/" 
     end
     
-    # Array of first level mailboxes.
+    # Array of all mailboxes.
     def mailboxes
       @mailboxes.values
     end
     
-    # Array of all mailboxes.
-    def all
-      mailboxes.inject([]) do |list, mailbox|
-        (list << mailbox) + mailbox.descendants
-      end
-    end
-    
     def each(*args, &block)
-      all.each(*args, &block)
+      @mailboxes.values(*args, &block)
     end
     
     # Return +true+ when given mailbox defined.
     def exist?(name)
-      not all.detect {|mailbox| mailbox.name == name or mailbox.imap_path == name}.nil?
+      @mailboxes.key?(name)
     end
     alias :exists? :exist?
     
@@ -84,10 +77,9 @@ module Gmail
     end
     
     # Switch to a given mailbox.
-    def switch_to_mailbox(name, &block)
+    def switch_to_mailbox(mailbox, &block)
       @mailbox_mutex.synchronize do
-        mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
-        _switch_to_mailbox(name) if @current_mailbox != name
+        _switch_to_mailbox(mailbox) if @current_mailbox != mailbox
         
         if block_given?
           mailbox_stack << @current_mailbox
@@ -126,7 +118,7 @@ module Gmail
     private
     
     def _switch_to_mailbox(mailbox)
-      client.imap.select(Net::IMAP.encode_utf7(mailbox)) if mailbox
+      client.imap.select(Net::IMAP.encode_utf7(mailbox.imap_path)) if mailbox
       @current_mailbox = mailbox
     end
     

@@ -12,17 +12,14 @@ end
 
 def within_gmail(&block)
   gmail = Gmail.connect!(*TEST_ACCOUNT)
-  yield(gmail)
+  yield gmail if block_given?
   gmail.logout if gmail
 end
 
 def mock_client(&block)
-  Gmail.connect(*TEST_ACCOUNT) do |client|
-    if block_given?
-      yield client
-      client.logout
-    end
-  end
+  client = Gmail.connect!(*TEST_ACCOUNT)
+  yield client if block_given?
+  client.logout
 end
 
 # Run test by creating your own test account with credentials in account.yml

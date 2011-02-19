@@ -16,22 +16,25 @@ module Gmail
       :undrafted => ['UNDRAFT']
     }
     
-    attr_reader :controller, :name, :imap_path, :delim, :parent
+    attr_reader :controller, :name, :imap_path, :delim, :parent, :children, :descendants
     def initialize(controller, name="INBOX", parent=nil)
       @controller = controller
       @name  = name.split(controller.delim).last.strip
       @imap_path = name
       @parent = parent
+      
+      @children = controller.load_mailboxes(self).values
+      @descendants = @children.inject([]) {|l, c| (l << c) + c.descendants}
+      
+      self
     end
     
-    # Return array of children mailboxes.
-    def children
-      @children ||= controller.load_mailboxes(self).values
-    end
-    
-    # Return array of descendants.
-    def descendants
-      @descendants = children.inject([]) {|l, c| (l << c) + c.descendants}
+    def new(*args)
+      raise ArgumentError, "wrong number of arguments" if args.length < 1
+      return args[0].mailbox!(name) if args[0].exist?(name)
+      
+      instance = allocate
+      instance.send(:initialize, *args)
     end
     
     # Enumerate for children.
@@ -44,7 +47,7 @@ module Gmail
       descendants.each(*args, &block)
     end
     
-    # Returns list of emails which meets given criteria. 
+    # Return list of emails which meets given criteria.
     #
     # ==== Examples
     #
@@ -53,12 +56,13 @@ module Gmail
     #   gmail.inbox.emails(:all, :after => Time.now-(20*24*3600))
     #   gmail.mailbox("Test").emails(:read)
     #
-    #   gmail.mailbox("Test") do |box| 
+    #   gmail.mailbox("Test") do |box|
     #     box.emails(:read)
     #     box.emails(:unread) do |email|
     #       ... do something with each email...
     #     end
     #   end
+    #
     def emails(*args, &block)
       args << :all if args.size.zero?
       
@@ -78,8 +82,8 @@ module Gmail
         opts[:body]       and search.concat ['BODY', opts[:body]]
         opts[:query]      and search.concat opts[:query]
         
-        controller.switch_to_mailbox(name) do
-          controller.uid_search(search).collect do |uid| 
+        controller.switch_to_mailbox(self) do
+          controller.uid_search(search).collect do |uid|
             message = (messages[uid] ||= Message.new(self, uid))
             block.call(message) if block_given?
             message
@@ -93,8 +97,8 @@ module Gmail
     end
     alias :find :emails
     
-    # This is a convenience method that really probably shouldn't need to exist, 
-    # but it does make code more readable, if seriously all you want is the count 
+    # This is a convenience method that really probably shouldn't need to exist,
+    # but it does make code more readable, if seriously all you want is the count
     # of messages.
     #
     # ==== Examples
@@ -109,7 +113,7 @@ module Gmail
     
     # This permanently removes messages which are marked as deleted
     def expunge
-      controller.switch_to_mailbox(imap_path) { controller.expunge }
+      controller.switch_to_mailbox(self) { controller.expunge }
     end
     
     # Cached messages.

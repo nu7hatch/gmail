@@ -1,11 +1,11 @@
 require 'spec_helper.rb'
 
 describe "Gmail mailbox controller" do
+  subject { Gmail.connect!(*TEST_ACCOUNT).mailbox_controller }
+  
   context "instance" do
-    subject { Gmail.connect(*TEST_ACCOUNT).mailbox_controller }
-    
     it "should get list of all available mailboxes" do
-      labels = subject.all.map {|m| m.imap_path}
+      labels = subject.mailboxes.map {|m| m.imap_path}
       labels.should include("INBOX")
     end
     
@@ -38,8 +38,6 @@ describe "Gmail mailbox controller" do
   end
   
   context "mailboxes" do
-    subject { Gmail.connect(*TEST_ACCOUNT).mailbox_controller }
-    
     %w[mailbox mailbox!].each do |method|
       it "##{method} should return INBOX if no name was given" do
         mailbox = subject.send(method)

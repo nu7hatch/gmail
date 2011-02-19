@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 describe "A Gmail mailbox" do
-  subject { Gmail::Mailbox }
-  
   context "on initialize" do
+    subject { Gmail::Mailbox }
+    
     it "should set controller and name" do
       mock_client do |client|
-        mailbox = subject.new(client.mailbox_controller, "TEST")
+        mailbox = subject.new(client.mailbox_controller, "TEST", nil)
         mailbox.instance_variable_get("@controller").should == client.mailbox_controller
         mailbox.name.should == "TEST"
       end
@@ -21,21 +21,14 @@ describe "A Gmail mailbox" do
   end
   
   context "instance" do
-    # def mock_mailbox(box="[Google Mail]/Alle Nachrichten", &block)
-    #   mock_client do |client|
-    #     mailbox = subject.new(client.mailbox_controller, box)
-    #     yield mailbox if block_given?
-    #     mailbox
-    #   end
-    # end
+    subject { Gmail.connect!(*TEST_ACCOUNT).mailbox!("[Google Mail]/Alle Nachrichten") }
     
     it "should be able to count all emails" do
-      # mock_mailbox do |mailbox|
-      #   mailbox.count.should > 0
-      # end
+      subject.count.should > 0
     end
     
     it "should be able to find messages" do
+      pending "Wait for refactor Gmail::Message"
       # mock_mailbox do |mailbox|
       #   message = mailbox.emails.first
       #   mailbox.emails(:all, :from => message.from.first.name) == message.from.first.name
