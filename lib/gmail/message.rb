@@ -54,12 +54,13 @@ module Gmail
     
     # Mark message with star.
     def star!
-      flag('[Google Mail]/Starred')
+      move_to(mailbox.controller.starred)
     end
     
     # Remove message from list of starred.
     def unstar!
-      unflag('[Google Mail]/Starred')
+      mailbox.controller.starred.message_with_id(message_id).move_to(mailbox.controller.all_mail)
+      delete!
     end
     
     # Move to trash.
@@ -93,7 +94,9 @@ module Gmail
     #
     # See also <tt>Gmail::Message#label!</tt>.
     def label(name, from=nil)
-      mailbox.switch_to_mailbox(Net::IMAP.encode_utf7(from.to_s || mailbox.name)) { mailbox.controller.uid_copy(uid, Net::IMAP.encode_utf7(name)) }
+      from = from.nil? ? mailbox.to_s : from.to_s
+      name = name.to_s
+      mailbox.controller.switch_to_mailbox(from) { mailbox.controller.uid_copy(uid, Net::IMAP.encode_utf7(name)) }
     rescue Net::IMAP::NoResponseError
       raise NoLabelError, "Label '#{name}' doesn't exist!"
     end
@@ -105,7 +108,7 @@ module Gmail
     def label!(name, from=nil)
       label(name, from)
     rescue NoLabelError
-      name = Mailbox.new(mailbox.controller, name).to_s
+      name = Mailbox.new(mailbox.controller, name)
       label(name, from)
     end
     alias :add_label :label!
@@ -118,7 +121,7 @@ module Gmail
     alias :delete_label! :remove_label!
     
     def inspect
-      "#<Gmail::Message#{'0x%04x' % (object_id << 1)} mailbox=#{@mailbox.external_name}#{' uid='+@uid.to_s if @uid}#{' message_id='+@message_id.to_s if @message_id}>"
+      "#<Gmail::Message#{'0x%04x' % (object_id << 1)} mailbox=#{@mailbox.name}#{' uid='+@uid.to_s if @uid}#{' message_id='+@message_id.to_s if @message_id}>"
     end
     
     def method_missing(meth, *args, &block)

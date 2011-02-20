@@ -106,6 +106,15 @@ module Gmail
     end
     alias :find :emails
     
+    def message_with_id(message_id, &block)
+      controller.switch_to_mailbox(self) do
+        uid = controller.search("HEADER message-id \"#{message_id}\"").first
+        message = (messages[uid] ||= Message.new(self, uid))
+        block.call(message) if block_given?
+        message
+      end
+    end
+    
     # This is a convenience method that really probably shouldn't need to exist,
     # but it does make code more readable, if seriously all you want is the count
     # of messages.

@@ -95,6 +95,7 @@ module Gmail
     def mailbox!(name="INBOX")
       mailbox(name, true)
     end
+    alias :[] :mailbox!
     
     # Switch to a given mailbox.
     def switch_to_mailbox(mailbox, &block)
@@ -114,7 +115,7 @@ module Gmail
     end
     
     # Make access to methods in client.imap for convenience.
-    %w[uid_search uid_store uid_copy uid_fetch expunge].each do |method|
+    %w[search uid_search uid_store uid_copy uid_fetch expunge].each do |method|
       define_method(method) do |*args|
         client.imap.send(method, *args)
       end
@@ -156,7 +157,7 @@ module Gmail
     end
     
     def _switch_to_mailbox(mailbox)
-      client.imap.select(Net::IMAP.encode_utf7(mailbox.name)) if mailbox
+      client.imap.select(Net::IMAP.encode_utf7(mailbox.to_s)) if mailbox
       @current_mailbox = mailbox
     end
     

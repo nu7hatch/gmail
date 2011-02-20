@@ -34,12 +34,14 @@ module Gmail
       self
     end
     
+    # Connect and login to the given Gmail account.
     def connect
       connection.connect and connection.login
     end
     alias :new :connect
     alias :login :connect
     
+    # This will raise error on failure...
     def connect!
       connection.connect! and connection.login!
     end
@@ -59,6 +61,7 @@ module Gmail
       @mailbox_controller ||= MailboxController.new(self)
     end
     alias :labels :mailbox_controller
+    alias :mailboxes :mailbox_controller
     
     # Make access to methods in mailbox controller object.
     %w[mailbox mailbox! all_mailboxes all_labels add create remove delete].each do |method|
