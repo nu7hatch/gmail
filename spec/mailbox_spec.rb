@@ -1,27 +1,32 @@
 require 'spec_helper'
 
 describe "A Gmail mailbox" do
+  before(:all) do
+    @client = Gmail.connect!(*TEST_ACCOUNT)
+  end
+  
+  after(:all) do
+    @client.logout
+    @client = nil
+  end
+  
   context "on initialize" do
     subject { Gmail::Mailbox }
     
     it "should set controller and name" do
-      mock_client do |client|
-        mailbox = subject.new(client.mailbox_controller, "TEST")
-        mailbox.instance_variable_get("@controller").should == client.mailbox_controller
-        mailbox.name.should == "TEST"
-      end
+      mailbox = subject.new(@client.mailbox_controller, "TEST")
+      mailbox.instance_variable_get("@controller").should == @client.mailbox_controller
+      mailbox.name.should == "TEST"
     end
     
     it "should work in INBOX by default" do
-      mock_client do |client|
-        mailbox = subject.new(client.mailbox_controller)
-        mailbox.name.should == "INBOX"
-      end
+      mailbox = subject.new(@client.mailbox_controller)
+      mailbox.name.should == "INBOX"
     end
   end
   
   context "instance" do
-    subject { Gmail.connect!(*TEST_ACCOUNT).all_mail }
+    subject { @client.all_mail }
     
     it "should be able to count all emails" do
       subject.count.should > 0

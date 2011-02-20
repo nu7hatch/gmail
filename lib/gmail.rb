@@ -24,8 +24,7 @@ module Gmail
   
   class << self
     
-    # Create new Gmail client using given authorization information.
-    # A client created with <tt>Gmail#new</tt> does not connect and login by default.
+    # Create new Gmail client and login using given authorization information.
     #
     # ==== Examples
     #
@@ -41,26 +40,33 @@ module Gmail
     #     # ...
     #   end
     #
-    def new(*args, &block)
-      client = Client.new(*args)
-      perform_block(client, &block)
+    %w[new new! connect connect! login login!].each do |method|
+      define_method(method) do |*args, &block|
+        client = Client.new(*args)
+        client.send(method)
+        perform_block(client, &block)
+      end
     end
-    
-    # Create new Gmail client and login using given authorization infomation.
-    def connect(*args, &block)
-      client = Client.new(*args)
-      client.connect()
-      client.login()
-      perform_block(client, &block)
-    end
-    
-    # This version of connect will raise error on failure...
-    def connect!(*args, &block)
-      client = Client.new(*args)
-      client.connect!()
-      client.login!()
-      perform_block(client, &block)
-    end
+    # def new(*args, &block)
+    #   client = Client.new(*args)
+    #   perform_block(client, &block)
+    # end
+    # 
+    # # Create new Gmail client and login using given authorization infomation.
+    # def connect(*args, &block)
+    #   client = Client.new(*args)
+    #   client.connect()
+    #   client.login()
+    #   perform_block(client, &block)
+    # end
+    # 
+    # # This version of connect will raise error on failure...
+    # def connect!(*args, &block)
+    #   client = Client.new(*args)
+    #   client.connect!()
+    #   client.login!()
+    #   perform_block(client, &block)
+    # end
     
     protected
     

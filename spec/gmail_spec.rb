@@ -19,9 +19,9 @@ describe "Gmail" do
       end
     end
     
-    it "should not login after a #new method" do
+    it "should always login after a #new method" do
       gmail = Gmail.new(*TEST_ACCOUNT)
-      gmail.should_not be_logged_in
+      gmail.should be_logged_in
     end
   end
   

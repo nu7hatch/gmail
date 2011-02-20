@@ -1,7 +1,16 @@
 require 'spec_helper'
 
 describe Gmail::MailboxController, "instance" do
-  subject { Gmail.connect!(*TEST_ACCOUNT).mailbox_controller }
+  before(:all) do
+    @controller = Gmail.connect!(*TEST_ACCOUNT).mailbox_controller
+  end
+  
+  after(:all) do
+    @controller.client.logout
+    @controller = nil
+  end
+  
+  subject { @controller }
   
   it "should get list of all available mailboxes" do
     subject.labels.should include("INBOX")
@@ -14,23 +23,23 @@ describe Gmail::MailboxController, "instance" do
   
   it "should be able to create given label" do
     subject.create("MYLABEL")
-    subject.exists?("MYLABEL").should be_true
+    subject.exist?("MYLABEL").should be_true
     subject.create("MYLABEL").should be_false
     subject.delete("MYLABEL")
   end
   
   it "should be able to remove existing label" do
-    subject.create("MYLABEL")
-    subject.delete("MYLABEL").should be_true
-    subject.exists?("MYLABEL").should be_false
-    subject.delete("MYLABEL").should be_false
+    subject.create("MYLABEL 2")
+    subject.delete("MYLABEL 2").should be_true
+    subject.exist?("MYLABEL 2").should be_false
+    subject.delete("MYLABEL 2").should be_false
   end
   
   it "should be able to create label with non-ascii characters" do
     name = Net::IMAP.decode_utf7("TEST &APYA5AD8-") # TEST äöü
     subject.create(name)
     subject.delete(name).should be_true
-    subject.exists?(name).should be_false
+    subject.exist?(name).should be_false
     subject.delete(name).should be_false
   end
   

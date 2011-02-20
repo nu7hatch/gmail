@@ -20,7 +20,7 @@ module Gmail
     
     attr_reader :connection
     def initialize(*args)
-      raise AgumentError, 'wrong number of arguments' if args.length < 2
+      raise ArgumentError, 'wrong number of arguments' if args.length < 2
       
       username = args[0]
       password = args[1].is_a?(String) ? args[1] : ''
@@ -34,10 +34,22 @@ module Gmail
       self
     end
     
+    def connect
+      connection.connect and connection.login
+    end
+    alias :new :connect
+    alias :login :connect
+    
+    def connect!
+      connection.connect! and connection.login!
+    end
+    alias :new! :connect!
+    alias :login! :connect!
+    
     # Make access to methods in connection object.
-    %w[connect connect! login login! logout logged_in? imap username password smtp_settings authentication].each do |method|
+    %w[logout logged_in? imap username password smtp_settings authentication].each do |method|
       define_method(method) do |*args|
-        @connection.send(method, *args)
+        connection.send(method, *args)
       end
     end
     

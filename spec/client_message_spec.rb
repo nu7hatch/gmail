@@ -23,6 +23,7 @@ describe Gmail::Client, "message deliver feature" do
   
   it "should deliver inline composed email" do
     mock_client do |client|
+      client.expects(:deliver).returns(true)
       client.deliver do
         to TEST_ACCOUNT[0]
         subject "Hello world!"

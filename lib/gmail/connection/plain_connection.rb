@@ -11,7 +11,8 @@ module Gmail
       
       @logged_in = @imap.login(username, password).name == 'OK'
     rescue Net::IMAP::NoResponseError => e
-      raise_errors and raise Gmail::Client::AuthorizationError.new(e.response, "Couldn't login to given Gmail account: #{username}")
+      raise_errors and raise Gmail::Client::AuthorizationError.new(e.response,
+          "Couldn't login to given Gmail account: #{username}")
     end
   end # PlainConnection
 end # Gmail

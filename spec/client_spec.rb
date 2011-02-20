@@ -59,7 +59,6 @@ describe "Gmail client" do
     it "should raise error when given Gmail account is invalid and errors enabled" do
       lambda {
         client = Gmail::Client.new("foo", "bar")
-        client.connect.should be_true
         client.login!.should_not be_true
       }.should raise_error(Gmail::Client::AuthorizationError)
     end
