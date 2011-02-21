@@ -4,6 +4,8 @@ module Gmail
   class MailboxController
     include Enumerable
     
+    # Names of the system mailboxes in different languages...
+    # TODO: Complete the list or find another way!
     SYSTEM_MAILBOXES_NAME = {
       #:root => '[Gmail], [Google Mail]',
       :inbox => 'INBOX',
@@ -37,7 +39,7 @@ module Gmail
     end
     alias :all_labels :labels
     
-    def all_mailboxes
+    def all
       mailboxes.values
     end
     
@@ -53,6 +55,7 @@ module Gmail
     
     # Create mailbox with given path in your account.
     def create(path)
+      return false if exist?(path)
       client.imap.create(Net::IMAP.encode_utf7(path))
       
       path.split(delim).inject("") do |a, b|
@@ -128,7 +131,7 @@ module Gmail
     # Load the hash which contains all the children mailboxes of the given mailbox.
     def load_mailboxes(mailbox=nil)
       mailboxes = {}
-      path = mailbox.nil? ? "" : (mailbox.name + delim)
+      path = mailbox.nil? ? "" : (mailbox.to_s + delim)
         
       client.imap.list(Net::IMAP.encode_utf7(path), "%").to_a.each do |m|
         mbox = Mailbox.new(self, Net::IMAP.decode_utf7(m.name))
