@@ -45,5 +45,7 @@ module Gmail
          }]
       end
     end # XOAuth
+
+    register :xoauth, XOAuth
   end # Client
 end # Gmail

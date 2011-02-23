@@ -6,17 +6,24 @@ module Gmail
     class AuthorizationError < Net::IMAP::NoResponseError; end
     # Raised when delivered email is invalid. 
     class DeliveryError < ArgumentError; end
-    
-    autoload :Base,   'gmail/client/base'
-    autoload :Plain,  'gmail/client/plain'
-    autoload :XOAuth, 'gmail/client/xoauth'
+    # Raised when given client is not registered
+    class UnknownClient < ArgumentError; end
 
-    def self.new_plain(*args)
-      Gmail::Client::Plain.new(*args)
+    def self.register(name, klass)
+      @clients ||= {}
+      @clients[name] = klass
     end
 
-    def self.new_xoauth(*args)
-      Gmail::Client::XOAuth.new(*args)
+    def self.new(name, *args)
+      if client = @clients[name]
+        client.new(*args)
+      else
+        raise UnknownClient, "No such client: #{name}" 
+      end
     end
+
+    require 'gmail/client/base'
+    require 'gmail/client/plain'
+    require 'gmail/client/xoauth'
   end # Client
 end # Gmail
