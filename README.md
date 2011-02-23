@@ -208,7 +208,7 @@ labels:
 
 Create new label:
   
-    gmail.labels.new("Uregent")
+    gmail.labels.new("Urgent")
     gmail.labels.add("AnotherOne")
     
 Remove labels:
