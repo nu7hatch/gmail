@@ -3,7 +3,14 @@ module Gmail
     # Raised when connection with GMail IMAP service couldn't be established. 
     class ConnectionError < SocketError; end
     # Raised when given username or password are invalid.
-    class AuthorizationError < Net::IMAP::NoResponseError; end
+    class AuthorizationError < Net::IMAP::NoResponseError
+      if RUBY_VERSION >= "1.9.2"
+        def initialize(message)
+          response = Net::IMAP::ResponseText.new(message)
+          super(Net::IMAP::TaggedResponse.new(nil, nil, response, nil))
+        end
+      end
+    end
     # Raised when delivered email is invalid. 
     class DeliveryError < ArgumentError; end
     
