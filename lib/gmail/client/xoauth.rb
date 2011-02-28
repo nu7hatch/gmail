@@ -34,11 +34,11 @@ module Gmail
            :port => GMAIL_SMTP_PORT,
            :domain => mail_domain,
            :user_name => username,
-           :password => secret = {
+           :password => {
              :consumer_key    => consumer_key,
              :consumer_secret => consumer_secret,
              :token           => token,
-             :token_secret    => token_secret
+             :token_secret    => secret
            },
            :authentication => :xoauth,
            :enable_starttls_auto => true
