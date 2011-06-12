@@ -164,7 +164,7 @@ module Gmail
 
     def message
       @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
-        @gmail.conn.uid_fetch(uid, "BODY.PEEK[]")[0].attr["BODY[]"]
+        @gmail.conn.uid_fetch(uid, "RFC822")[0].attr["RFC822"]
       })
     end
     
