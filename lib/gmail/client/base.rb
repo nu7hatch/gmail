@@ -18,7 +18,6 @@ module Gmail
         defaults       = {}
         @username      = fill_username(username)
         @options       = defaults.merge(options)
-        @mailbox_mutex = Mutex.new
       end
       
       # Connect to gmail service. 
@@ -151,21 +150,20 @@ module Gmail
       #     ...
       #   end
       def mailbox(name, &block)
-        @mailbox_mutex.synchronize do
-          name = name.to_s
-          mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
-          switch_to_mailbox(name) if @current_mailbox != name
-
-          if block_given?
-            mailbox_stack << @current_mailbox
-            result = block.arity == 1 ? block.call(mailbox) : block.call
-            mailbox_stack.pop
-            switch_to_mailbox(mailbox_stack.last)
-            return result
-          end
-
-          return mailbox
+        name = name.to_s
+        
+        mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
+        
+        if @current_mailbox != name
+          switch_to_mailbox(name)
+          mailbox.total = conn.responses["EXISTS"][-1]
         end
+
+        if block_given?
+          return block.arity == 1 ? block.call(mailbox) : block.call
+        end
+
+        return mailbox
       end
       alias :in_mailbox :mailbox
       alias :in_label :mailbox

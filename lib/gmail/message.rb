@@ -7,10 +7,13 @@ module Gmail
   
     attr_reader :uid
     
-    def initialize(mailbox, uid)
-      @uid     = uid
-      @mailbox = mailbox
-      @gmail   = mailbox.instance_variable_get("@gmail") if mailbox
+    def initialize(mailbox, uid, size = nil, envelope = nil, header = nil)
+      @uid      = uid
+      @mailbox  = mailbox
+      @gmail    = mailbox.instance_variable_get("@gmail") if mailbox
+      @size     = size
+      @envelope = envelope
+      @header  = header
     end
     
     def uid
@@ -146,18 +149,31 @@ module Gmail
         super(meth, *args, &block)
       end
     end
+    
+    def size
+      @size ||= @gmail.mailbox(@mailbox.name) {
+        @gmail.conn.uid_fetch(uid, "RFC822.SIZE")[0].attr["RFC822.SIZE"]
+      }
+    end
 
     def envelope
       @envelope ||= @gmail.mailbox(@mailbox.name) {
         @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"]
       }
     end
-    
+
     def message
       @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
-        @gmail.conn.uid_fetch(uid, "RFC822")[0].attr["RFC822"] # RFC822
+        @gmail.conn.uid_fetch(uid, "BODY.PEEK[]")[0].attr["BODY[]"]
       })
     end
+    
+    def header
+      @header ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
+        @gmail.conn.uid_fetch(uid, "RFC822.HEADER")[0].attr["RFC822.HEADER"] # RFC822
+      })
+    end
+    
     alias_method :raw_message, :message
 
   end # Message
