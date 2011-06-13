@@ -7,13 +7,13 @@ module Gmail
   
     attr_reader :uid
     
-    def initialize(mailbox, uid, size = nil, envelope = nil, header = nil)
+    def initialize(mailbox, uid, size = nil, envelope = nil, flags = nil)
       @uid      = uid
       @mailbox  = mailbox
       @gmail    = mailbox.instance_variable_get("@gmail") if mailbox
       @size     = size
       @envelope = envelope
-      @header  = header
+      @flags    = flags
     end
     
     def uid
@@ -28,6 +28,11 @@ module Gmail
     # Unmark message. 
     def unflag(name)
       !!@gmail.mailbox(@mailbox.name) { @gmail.conn.uid_store(uid, "-FLAGS", [name]) }
+    end
+    
+    # true if message is marked as read
+    def read?
+      return flags.include? :Seen
     end
     
     # Do commonly used operations on message. 
@@ -168,9 +173,9 @@ module Gmail
       })
     end
     
-    def header
-      @header ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
-        @gmail.conn.uid_fetch(uid, "RFC822.HEADER")[0].attr["RFC822.HEADER"] # RFC822
+    def flags
+      @flags ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
+        @gmail.conn.uid_fetch(uid, "FLAGS")[0].attr["FLAGS"]
       })
     end
     

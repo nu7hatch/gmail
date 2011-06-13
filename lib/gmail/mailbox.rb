@@ -55,7 +55,11 @@ module Gmail
     #   gmail.inbox.fetch([start, 1].max..-1) # Fetch last 50 items in inbox
     #
     def fetch(range, &block)
-      search = [ FLAG_ALIASES[:uid], FLAG_ALIASES[:size], FLAG_ALIASES[:envelope] ]
+      search = [ 
+        FLAG_ALIASES[:uid], 
+        FLAG_ALIASES[:flags], 
+        FLAG_ALIASES[:size], 
+        FLAG_ALIASES[:envelope] ]
               
       @gmail.mailbox(name) do
         list = @gmail.conn.fetch(range, "(#{search.join(' ')})") || []
@@ -64,9 +68,9 @@ module Gmail
           uid = msg.attr['UID']
           size = msg.attr['RFC822.SIZE']
           envelope = msg.attr['ENVELOPE']
-          header = msg.attr['RFC822.HEADER']        
-          
-          message = (messages[uid] ||= Message.new(self, uid, size, envelope, header))
+          flags = msg.attr['FLAGS']
+
+          message = (messages[uid] ||= Message.new(self, uid, size, envelope, flags))
           
           yield(message)
         end
