@@ -35,6 +35,11 @@ module Gmail
       return flags.include? :Seen
     end
     
+    # true if message is starred
+    def starred?
+      return flags.include? :Flagged
+    end
+    
     # Do commonly used operations on message. 
     def mark(flag)
       case flag
