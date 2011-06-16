@@ -151,6 +151,7 @@ module Gmail
       #     ...
       #   end
       def mailbox(name, &block)
+        @mailbox_mutex = Mutex.new
         @mailbox_mutex.synchronize do
           name = name.to_s
           mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
