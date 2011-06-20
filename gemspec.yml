@@ -17,6 +17,5 @@ dependencies:
   gmail_xoauth: >= 0.3.0
 
 development_dependencies:
-  ore-tasks: ~> 0.4
   rspec: ~> 2.0
   mocha: >= 0.9
