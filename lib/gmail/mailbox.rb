@@ -23,9 +23,8 @@ module Gmail
       :envelope  => ['ENVELOPE'],
       :flags     => ['FLAGS'],
       :date      => ['INTERNALDATE'],
-      :header    => ['RFC822.HEADER'],
-      :size      => ['RFC822.SIZE'],
-      :text      => ['RFC822.TEXT']
+      :header    => ['BODY.PEEK[HEADER]'],
+      :size      => ['RFC822.SIZE']
     }
   
     attr_reader :name
@@ -58,7 +57,9 @@ module Gmail
       search = [ 
         FLAG_ALIASES[:uid], 
         FLAG_ALIASES[:flags], 
+        FLAG_ALIASES[:date],
         FLAG_ALIASES[:size], 
+        FLAG_ALIASES[:header], 
         FLAG_ALIASES[:envelope] ]
               
       @gmail.mailbox(name) do
@@ -67,10 +68,12 @@ module Gmail
         list.each do |msg|
           uid = msg.attr['UID']
           size = msg.attr['RFC822.SIZE']
-          envelope = msg.attr['ENVELOPE']
+          date = msg.attr['INTERNALDATE']
           flags = msg.attr['FLAGS']
+          envelope = msg.attr['ENVELOPE']
+          header = msg.attr['BODY[HEADER]']
 
-          message = (messages[uid] ||= Message.new(self, uid, size, envelope, flags))
+          message = (messages[uid] ||= Message.new(self, uid, size, envelope, flags, header))
           
           yield(message)
         end
