@@ -18,7 +18,6 @@ module Gmail
         defaults       = {}
         @username      = fill_username(username)
         @options       = defaults.merge(options)
-        @mailbox_mutex = Mutex.new
       end
 
       # Connect to gmail service.
@@ -151,6 +150,7 @@ module Gmail
       #     ...
       #   end
       def mailbox(name, &block)
+        @mailbox_mutex = Mutex.new
         @mailbox_mutex.synchronize do
           name = name.to_s
           mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
