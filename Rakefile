@@ -1,3 +1,4 @@
+require 'psych'
 # -*- ruby -*-
 
 $:.unshift(File.expand_path('../lib', __FILE__))
@@ -23,7 +24,7 @@ end
 task :test => :spec
 task :default => :test
 
-begin 
+begin
   require 'metric_fu'
 rescue LoadError
   STDERR.puts e.message
