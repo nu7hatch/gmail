@@ -1,13 +1,9 @@
 module Gmail
   class Version #:nodoc:
-    MAJOR  = 0
-    MINOR  = 4
-    PATCH  = 0
-    EXTRA  = 'brewster'
-    STRING = [MAJOR, MINOR, PATCH, EXTRA].join('.')
+    STRING = '0.4.0.brewster'
   end # Version
 
   def self.version # :nodoc:
-    Version::STRING
+    '0.4.0.brewster'
   end
 end # Gmail
