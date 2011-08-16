@@ -5,7 +5,7 @@ require 'gmail/version'
 
 begin
   Ore::Specification.new do |gemspec|
-    gemspec.version = '0.4.0.brewster'
+    gemspec.version = Gmail.version
   end
 rescue NameError
   begin
