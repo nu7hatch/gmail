@@ -23,7 +23,7 @@ module Gmail
     end
 
     def flags
-      @gmail.mailbox(@mailbox.name) { @gmail.conn.uid_fetch(uid, "FLAGS") }
+      @gmail.mailbox(@mailbox.name) { @gmail.conn.uid_fetch(uid, "FLAGS") }.first.attr['FLAGS']
     end
 
     # Unmark message.
