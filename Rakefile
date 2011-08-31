@@ -25,7 +25,7 @@ task :default => :test
 
 begin 
   require 'metric_fu'
-rescue LoadError
+rescue LoadError => e
   STDERR.puts e.message
   STDERR.puts "Run `gem install metric_fu` to install Metric-Fu"
 end
