@@ -41,7 +41,8 @@ module Gmail
              :consumer_key    => consumer_key,
              :consumer_secret => consumer_secret,
              :token           => token,
-             :token_secret    => secret
+             :token_secret    => secret,
+             :two_legged      => two_legged
            },
            :authentication => :xoauth,
            :enable_starttls_auto => true

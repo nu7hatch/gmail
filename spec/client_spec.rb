@@ -217,4 +217,21 @@ describe "Gmail client (XOAuth)" do
       client.logout
     end
   end
+
+  context "instance" do
+    it "should include token, secret, consumer key, consumer secret and two legged flag on smtp settings" do
+      client = subject.new("test@gmail.com",
+                           :token => "token",
+                           :secret => "secret",
+                           :consumer_key => "consumer key",
+                           :consumer_secret => "consumer secret",
+                           :two_legged => true)
+
+      client.smtp_settings.last[:password][:token].should == "token"
+      client.smtp_settings.last[:password][:token_secret].should == "secret"
+      client.smtp_settings.last[:password][:consumer_key].should == "consumer key"
+      client.smtp_settings.last[:password][:consumer_secret].should == "consumer secret"
+      client.smtp_settings.last[:password][:two_legged].should == true
+    end
+  end
 end
