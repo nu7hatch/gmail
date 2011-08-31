@@ -13,6 +13,10 @@ tmtags
 ## VIM
 *.swp
 
+## IntelliJ / RubyMine
+.idea/*
+*.iml
+
 ## PROJECT::GENERAL
 coverage
 rdoc
