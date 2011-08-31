@@ -25,7 +25,7 @@ module Gmail
           :token_secret    => secret
         )) && login.name == 'OK'
       rescue
-        raise_errors and raise AuthorizationError, "Couldn't login to given GMail account: #{username}"        
+        raise_errors and raise AuthorizationError, "Couldn't login to given GMail account: #{username}"
       end
 
       def smtp_settings

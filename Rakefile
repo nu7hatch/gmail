@@ -23,7 +23,7 @@ end
 task :test => :spec
 task :default => :test
 
-begin 
+begin
   require 'metric_fu'
 rescue LoadError => e
   STDERR.puts e.message
