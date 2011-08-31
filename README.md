@@ -101,6 +101,14 @@ method. It's very simple:
       :consumer_secret => 'CONSUMER_SECRET'
     )
     
+or for 2 legged OAuth (aka, for use with Google Apps accounts)
+
+    gmail = Gmail.connect(:xoauth, "email@domain.com",
+      :two_legged      => true,
+      :consumer_key    => 'CONSUMER_KEY',
+      :consumer_secret => 'CONSUMER_SECRET'
+    )
+
 For more information check out the [gmail_xoauth](https://github.com/nfo/gmail_xoauth)
 gem from Nicolas Fouché.
 
