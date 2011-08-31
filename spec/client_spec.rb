@@ -171,3 +171,50 @@ describe "Gmail client (Plain)" do
     end
   end
 end
+
+describe "Gmail client (XOAuth)" do
+  subject { Gmail::Client::XOAuth }
+
+  context "on initialize" do
+    it "should set token, secret, consumer key, consumer secret, two legged flag and options" do
+      client = subject.new("test@gmail.com",
+                           :token => "token",
+                           :secret => "secret",
+                           :consumer_key => "consumer key",
+                           :consumer_secret => "consumer secret",
+                           :two_legged => true)
+
+      client.username.should == "test@gmail.com"
+      client.token.should == "token"
+      client.secret.should == "secret"
+      client.consumer_key.should == "consumer key"
+      client.consumer_secret.should == "consumer secret"
+      client.two_legged.should == true
+    end
+  end
+
+  context "on login" do
+    it "should pass token, secret, consumer key, consumer secret and two legged flag on ImapXoauthAuthenticator" do
+      client = subject.new("test@gmail.com",
+                           :token => "token",
+                           :secret => "secret",
+                           :consumer_key => "consumer key",
+                           :consumer_secret => "consumer secret",
+                           :two_legged => true)
+
+      client.connect
+
+      GmailXoauth::ImapXoauthAuthenticator.expects(:new).
+          with("test@gmail.com",
+               :token => "token",
+               :token_secret => "secret",
+               :consumer_key => "consumer key",
+               :consumer_secret => "consumer secret",
+               :two_legged => true)
+
+      client.login
+
+      client.logout
+    end
+  end
+end

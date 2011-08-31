@@ -7,13 +7,15 @@ module Gmail
       attr_reader :secret
       attr_reader :consumer_key
       attr_reader :consumer_secret
+      attr_reader :two_legged
 
       def initialize(username, options={})
         @token           = options.delete(:token)
         @secret          = options.delete(:secret)
         @consumer_key    = options.delete(:consumer_key)
         @consumer_secret = options.delete(:consumer_secret)
-       
+        @two_legged      = options.delete(:two_legged)
+
         super(username, options)
       end
 
@@ -22,7 +24,8 @@ module Gmail
           :consumer_key    => consumer_key,
           :consumer_secret => consumer_secret,
           :token           => token,
-          :token_secret    => secret
+          :token_secret    => secret,
+          :two_legged      => two_legged
         )) && login.name == 'OK'
       rescue
         raise_errors and raise AuthorizationError, "Couldn't login to given GMail account: #{username}"
