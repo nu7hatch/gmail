@@ -154,7 +154,7 @@ module Gmail
         @mailbox_mutex.synchronize do
           name = name.to_s
           mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
-          switch_to_mailbox(name) if @current_mailbox != name
+          switch_to_mailbox(name)
 
           if block_given?
             mailbox_stack << @current_mailbox
@@ -196,7 +196,7 @@ module Gmail
       private
       
       def switch_to_mailbox(mailbox)
-        if mailbox
+        if mailbox && @current_mailbox != mailbox
           mailbox = Net::IMAP.encode_utf7(mailbox)
           conn.select(mailbox)
         end
