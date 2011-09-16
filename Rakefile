@@ -1,3 +1,9 @@
+# Fix for 1.9.2, taken from http://rubyforge.org/tracker/index.php?func=detail&aid=28920&group_id=1513&atid=5921
+begin
+  require 'psych'
+rescue ::LoadError
+end
+
 # -*- ruby -*-
 
 $:.unshift(File.expand_path('../lib', __FILE__))
