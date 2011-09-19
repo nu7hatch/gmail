@@ -28,3 +28,9 @@ pkg
 
 ## Test Account details
 spec/account.yml
+
+## BUNDLER
+pkg/*
+*.gem
+.bundle
+Gemfile.lock

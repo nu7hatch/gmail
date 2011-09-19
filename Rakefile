@@ -1,21 +1,4 @@
-# Fix for 1.9.2, taken from http://rubyforge.org/tracker/index.php?func=detail&aid=28920&group_id=1513&atid=5921
-begin
-  require 'psych'
-rescue ::LoadError
-end
-
-# -*- ruby -*-
-
-$:.unshift(File.expand_path('../lib', __FILE__))
-require 'gmail/version'
-
-begin
-  require 'ore/tasks'
-  Ore::Tasks.new
-rescue LoadError => e
-  STDERR.puts e.message
-  STDERR.puts "Run `gem install ore-tasks` to install 'ore/tasks'."
-end
+require "bundler/gem_tasks"
 
 begin
   require 'rspec/core/rake_task'
