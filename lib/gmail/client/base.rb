@@ -190,7 +190,7 @@ module Gmail
       end
 
       def mail_domain
-        username.split('@')[0]
+        username.split('@').last
       end
       
       private
