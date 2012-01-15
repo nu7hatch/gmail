@@ -10,7 +10,12 @@ module Gmail
     
     # Get list of all defined labels.
     def all
-      (conn.list("", "%")+conn.list("[Gmail]/", "%")).inject([]) do |labels,label|
+      @list = []
+      
+      ## check each item in list for subfolders
+      conn.list("", "%").each {|l| sublabels_or_label(l)}
+      
+      @list.inject([]) do |labels,label|
         label[:name].each_line {|l| labels << Net::IMAP.decode_utf7(l) }
         labels 
       end
@@ -18,6 +23,15 @@ module Gmail
     alias :list :all
     alias :to_a :all
 
+    def sublabels_or_label(label)
+      if label.attr.include? :Hasnochildren
+        @list << label
+      else
+        @list << label
+        conn.list("#{label.name}/", "%").each {|l| sublabels_or_label(l)}
+      end
+    end
+    
     def each(*args, &block)
       all.each(*args, &block)
     end
