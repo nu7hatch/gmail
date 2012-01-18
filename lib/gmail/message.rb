@@ -7,6 +7,8 @@ module Gmail
   
     attr_reader :uid
     
+    @@labels_hash={}
+    
     def initialize(mailbox, uid)
       @uid     = uid
       @mailbox = mailbox
@@ -115,6 +117,22 @@ module Gmail
     end
     alias :add_label :label!
     alias :add_label! :label!
+    
+    def labels
+      email_labels = []
+
+      # cache messages in hash if it's blank
+      labels_hash(@gmail.labels.all) if @@labels_hash == {}
+      @@labels_hash.each {|l, emails| email_labels << l if emails.include?(self)}
+      email_labels
+    end
+    
+    def labels_hash(l)
+      l.each do |lab|
+        next if lab == "[Gmail]"
+        @@labels_hash[lab] = @gmail.label(lab).emails
+      end
+    end
     
     # Remove given label from this message. 
     def remove_label!(name)
