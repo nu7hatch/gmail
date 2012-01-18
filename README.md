@@ -24,6 +24,7 @@ Extra thanks for specific feature contributions from:
 * [Mikkel Malmberg](http://github.com/mikker)
 * [Julien Blanchard](http://github.com/julienXX)
 * [Federico Galassi](http://github.com/fgalassi)
+* [Alex Genco](http://github.com/alexgenco)
 
 ## Installation
 
