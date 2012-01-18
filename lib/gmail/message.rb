@@ -7,10 +7,14 @@ module Gmail
   
     attr_reader :uid
     
-    def initialize(mailbox, uid)
-      @uid     = uid
-      @mailbox = mailbox
-      @gmail   = mailbox.instance_variable_get("@gmail") if mailbox
+    def initialize(mailbox, uid, size = nil, envelope = nil, flags = nil, header = nil)
+      @uid      = uid
+      @mailbox  = mailbox
+      @gmail    = mailbox.instance_variable_get("@gmail") if mailbox
+      @size     = size
+      @envelope = envelope
+      @flags    = flags
+      @header   = header
     end
     
     def uid
@@ -25,6 +29,16 @@ module Gmail
     # Unmark message. 
     def unflag(name)
       !!@gmail.mailbox(@mailbox.name) { @gmail.conn.uid_store(uid, "-FLAGS", [name]) }
+    end
+    
+    # true if message is marked as read
+    def read?
+      return flags.include? :Seen
+    end
+    
+    # true if message is starred
+    def starred?
+      return flags.include? :Flagged
     end
     
     # Do commonly used operations on message. 
@@ -146,18 +160,37 @@ module Gmail
         super(meth, *args, &block)
       end
     end
+    
+    def size
+      @size ||= @gmail.mailbox(@mailbox.name) {
+        @gmail.conn.uid_fetch(uid, "RFC822.SIZE")[0].attr["RFC822.SIZE"]
+      }
+    end
 
     def envelope
       @envelope ||= @gmail.mailbox(@mailbox.name) {
         @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"]
       }
     end
-    
+
+    def flags
+      @flags ||= @gmail.mailbox(@mailbox.name) { 
+        @gmail.conn.uid_fetch(uid, "FLAGS")[0].attr["FLAGS"]
+      }
+    end
+
     def message
       @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
-        @gmail.conn.uid_fetch(uid, "RFC822")[0].attr["RFC822"] # RFC822
+        @gmail.conn.uid_fetch(uid, "BODY.PEEK[]")[0].attr["BODY[]"]
       })
     end
+        
+    def header
+      @header ||= @gmail.mailbox(@mailbox.name) { 
+        @gmail.conn.uid_fetch(uid, "BODY.PEEK[HEADER]")[0].attr["BODY[HEADER]"]
+      }
+    end
+    
     alias_method :raw_message, :message
 
   end # Message

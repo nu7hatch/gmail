@@ -15,14 +15,69 @@ module Gmail
       :draft     => ['DRAFT'],
       :undrafted => ['UNDRAFT']
     }
+    
+    FLAG_ALIASES = {
+      :uid       => ['UID'],
+      :body      => ['BODY'],
+      :structure => ['BODYSTRUCTURE'],
+      :envelope  => ['ENVELOPE'],
+      :flags     => ['FLAGS'],
+      :date      => ['INTERNALDATE'],
+      :header    => ['BODY.PEEK[HEADER]'],
+      :size      => ['RFC822.SIZE']
+    }
   
     attr_reader :name
     attr_reader :external_name
+    attr_accessor :total
 
     def initialize(gmail, name="INBOX")
       @name  = name
       @external_name = Net::IMAP.decode_utf7(name)
       @gmail = gmail
+    end
+    
+    # Fetches list of emails which meets given range criteria. 
+    #
+    # ==== Examples
+    #
+    #   gmail.inbox.fetch(1..50) # fetches message 1 to 30
+    #   gmail.inbox.fetch(30) # fetches last 30 messages
+    #
+    #   gmail.mailbox("Test") do |box| 
+    #     box.fetch(50) do |email|
+    #       ... do something with each email...
+    #     end
+    #   end
+    #
+    #   start = gmail.inbox.count - 50
+    #   gmail.inbox.fetch([start, 1].max..-1) # Fetch last 50 items in inbox
+    #
+    def fetch(range, &block)
+      search = [ 
+        FLAG_ALIASES[:uid], 
+        FLAG_ALIASES[:flags], 
+        FLAG_ALIASES[:date],
+        FLAG_ALIASES[:size], 
+        FLAG_ALIASES[:header], 
+        FLAG_ALIASES[:envelope] ]
+              
+      @gmail.mailbox(name) do
+        list = @gmail.conn.fetch(range, "(#{search.join(' ')})") || []
+
+        list.each do |msg|
+          uid = msg.attr['UID']
+          size = msg.attr['RFC822.SIZE']
+          date = msg.attr['INTERNALDATE']
+          flags = msg.attr['FLAGS']
+          envelope = msg.attr['ENVELOPE']
+          header = msg.attr['BODY[HEADER]']
+
+          message = (messages[uid] ||= Message.new(self, uid, size, envelope, flags, header))
+          
+          yield(message)
+        end
+      end
     end
 
     # Returns list of emails which meets given criteria. 
@@ -80,6 +135,9 @@ module Gmail
     # This is a convenience method that really probably shouldn't need to exist, 
     # but it does make code more readable, if seriously all you want is the count 
     # of messages.
+    #
+    # Please also have a look at the total field which gives a count of all the
+    # messages in the current folder, regardless of any search criteria.
     #
     # ==== Examples
     #
