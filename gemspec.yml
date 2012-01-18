@@ -12,11 +12,11 @@ email: chris@nu7hat.ch
 homepage: http://github.com/nu7hatch/gmail
 
 dependencies:
-  mime: >= 0.1
-  mail: >= 2.2.1
-  gmail_xoauth: >= 0.3.0
+  mime: '>= 0.1'
+  mail: '>= 2.2.1'
+  gmail_xoauth: '>= 0.3.0'
 
 development_dependencies:
-  ore-tasks: ~> 0.4
-  rspec: ~> 2.0
-  mocha: >= 0.9
+  ore-tasks: '~> 0.4'
+  rspec: '~> 2.0'
+  mocha: '>= 0.9'
