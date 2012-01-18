@@ -13,13 +13,24 @@ tmtags
 ## VIM
 *.swp
 
+## IntelliJ / RubyMine
+.idea/*
+*.iml
+
 ## PROJECT::GENERAL
 coverage
 rdoc
 pkg
+.rvmrc
 
 ## PROJECT::SPECIFIC
 *.rdb
 
 ## Test Account details
 spec/account.yml
+
+## BUNDLER
+pkg/*
+*.gem
+.bundle
+Gemfile.lock

@@ -1,11 +1,11 @@
 # GMail for Ruby
 
-A Rubyesque interface to Google's GMail, with all the tools you'll need. Search, 
-read and send multipart emails, archive, mark as read/unread, delete emails, 
+A Rubyesque interface to Google's GMail, with all the tools you'll need. Search,
+read and send multipart emails, archive, mark as read/unread, delete emails,
 and manage labels.
 
 It's based on Daniel Parker's ruby-gmail gem. This version has more friendy
-API, is well tested, better documented and have many other improvements.  
+API, is well tested, better documented and have many other improvements.
 
 ## Author(s)
 
@@ -30,14 +30,14 @@ Extra thanks for specific feature contributions from:
 You can install it easy using rubygems:
 
     sudo gem install gmail
-    
+
 Or install it manualy:
 
     git clone git://github.com/nu7hatch/gmail.git
     cd gmail
     rake install
 
-To install gmail gem you have to met following requirements (with rubygems all 
+To install gmail gem you have to met following requirements (with rubygems all
 will be installed automatically):
 
 * mail
@@ -50,9 +50,9 @@ will be installed automatically):
 * Read emails (handles attachments)
 * Emails: label, archive, delete, mark as read/unread/spam, star
 * Manage labels
-* Create and send multipart email messages in plaintext and/or html, with inline 
+* Create and send multipart email messages in plaintext and/or html, with inline
   images and attachments
-* Utilizes Gmail's IMAP & SMTP, MIME-type detection and parses and generates 
+* Utilizes Gmail's IMAP & SMTP, MIME-type detection and parses and generates
   MIME properly.
 
 ## Basic usage
@@ -60,29 +60,29 @@ will be installed automatically):
 First of all require the `gmail` library.
 
     require 'gmail'
-    
+
 ### Authenticating gmail sessions
 
-This will you automatically log in to your account. 
+This will you automatically log in to your account.
 
     gmail = Gmail.connect(username, password)
     # play with your gmail...
     gmail.logout
 
-If you pass a block, the session will be passed into the block, and the session 
+If you pass a block, the session will be passed into the block, and the session
 will be logged out after the block is executed.
 
     Gmail.connect(username, password) do |gmail|
       # play with your gmail...
     end
-    
-Examples above are "quiet", it means that it will not raise any errors when 
-session couldn't be started (eg. because of connection error or invalid 
+
+Examples above are "quiet", it means that it will not raise any errors when
+session couldn't be started (eg. because of connection error or invalid
 authorization data). You can use connection which handles errors raising:
 
     Gmail.connect!(username, password)
     Gmail.connect!(username, password) {|gmail| ... play with gmail ... }
-    
+
 You can also check if you are logged in at any time:
 
     Gmail.connect(username, password) do |gmail|
@@ -94,18 +94,26 @@ You can also check if you are logged in at any time:
 From v0.4.0 it's possible to authenticate with your Gmail account using XOAuth
 method. It's very simple:
 
-    gmail = Gmail.connect(:xoauth, "email@domain.com", 
+    gmail = Gmail.connect(:xoauth, "email@domain.com",
       :token           => 'TOKEN',
       :secret          => 'TOKEN_SECRET',
       :consumer_key    => 'CONSUMER_KEY',
       :consumer_secret => 'CONSUMER_SECRET'
     )
-    
+
+or for 2 legged OAuth (aka, for use with Google Apps accounts)
+
+    gmail = Gmail.connect(:xoauth, "email@domain.com",
+      :two_legged      => true,
+      :consumer_key    => 'CONSUMER_KEY',
+      :consumer_secret => 'CONSUMER_SECRET'
+    )
+
 For more information check out the [gmail_xoauth](https://github.com/nfo/gmail_xoauth)
 gem from Nicolas Fouché.
 
 ### Counting and gathering emails
-    
+
 Get counts for messages in the inbox:
 
     gmail.inbox.count
@@ -122,12 +130,12 @@ Count with some criteria:
 Combine flags and options:
 
     gmail.inbox.count(:unread, :from => "myboss@gmail.com")
-    
+
 Browsing labeled emails is similar to work with inbox.
 
     gmail.mailbox('Urgent').count
-    
-Getting messages works the same way as counting: Remember that every message in a 
+
+Getting messages works the same way as counting: Remember that every message in a
 conversation/thread will come as a separate message.
 
     gmail.inbox.emails(:unread, :before => Date.parse("2010-04-20"), :from => "myboss@gmail.com")
@@ -136,14 +144,14 @@ You can use also one of aliases:
 
     gmail.inbox.find(...)
     gmail.inbox.search(...)
-    gmail.inbox.mails(...)    
-    
+    gmail.inbox.mails(...)
+
 Also you can manipulate each message using block style:
 
     gmail.inbox.find(:unread) do |email|
       email.read!
     end
-    
+
 ### Working with emails!
 
 Any news older than 4-20, mark as read and archive it:
@@ -167,8 +175,8 @@ Save all attachments in the "Faxes" label to a local folder:
         email.message.save_attachments_to(folder)
       end
     end
-     
-You can use also `#label` method instead of `#mailbox`: 
+
+You can use also `#label` method instead of `#mailbox`:
 
     gmail.label("Faxes").emails {|email| ... }
 
@@ -180,17 +188,17 @@ Save just the first attachment from the newest unread email (assuming pdf):
 Add a label to a message:
 
     email.label("Faxes")
-    
-Example above will raise error when you don't have the `Faxes` label. You can 
+
+Example above will raise error when you don't have the `Faxes` label. You can
 avoid this using:
 
     email.label!("Faxes") # The `Faxes` label will be automatically created now
 
 You can also move message to a label/mailbox:
- 
+
     email.move_to("Faxes")
     email.move_to!("NewLabel")
-    
+
 There is also few shortcuts to mark messages quickly:
 
     email.read!
@@ -201,20 +209,20 @@ There is also few shortcuts to mark messages quickly:
 
 ### Managing labels
 
-With Gmail gem you can also manage your labels. You can get list of defined 
+With Gmail gem you can also manage your labels. You can get list of defined
 labels:
 
     gmail.labels.all
 
 Create new label:
-  
+
     gmail.labels.new("Urgent")
     gmail.labels.add("AnotherOne")
-    
+
 Remove labels:
 
     gmail.labels.delete("Uregent")
-    
+
 Or check if given label exists:
 
     gmail.labels.exists?("Uregent") # => false
@@ -222,10 +230,10 @@ Or check if given label exists:
 
 ### Composing and sending emails
 
-Creating emails now uses the amazing [Mail](http://rubygems.org/gems/mail) rubygem. 
-See its [documentation here](http://github.com/mikel/mail). The Ruby Gmail will 
-automatically configure your Mail emails to be sent via your Gmail account's SMTP, 
-so they will be in your Gmail's "Sent" folder. Also, no need to specify the "From" 
+Creating emails now uses the amazing [Mail](http://rubygems.org/gems/mail) rubygem.
+See its [documentation here](http://github.com/mikel/mail). The Ruby Gmail will
+automatically configure your Mail emails to be sent via your Gmail account's SMTP,
+so they will be in your Gmail's "Sent" folder. Also, no need to specify the "From"
 email either, because ruby-gmail will set it for you.
 
     gmail.deliver do
@@ -251,7 +259,7 @@ Or, compose the message first and send it later
     email.deliver! # or: gmail.deliver(email)
 
 ## Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
