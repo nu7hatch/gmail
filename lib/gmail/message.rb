@@ -12,7 +12,11 @@ module Gmail
       @mailbox = mailbox
       @gmail   = mailbox.instance_variable_get("@gmail") if mailbox
     end
-    
+        
+    def labels
+      @gmail.conn.uid_fetch(uid, "X-GM-LABELS")[0].attr["X-GM-LABELS"]
+    end
+   
     def uid
       @uid ||= @gmail.conn.uid_search(['HEADER', 'Message-ID', message_id])[0]
     end
