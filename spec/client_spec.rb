@@ -37,7 +37,7 @@ describe "Gmail client (Plain)" do
     
     it "should properly login to valid GMail account" do
       client = mock_client
-      client.connect.should be_true
+      client.connect.should be_nil
       client.login.should be_true
       client.should be_logged_in
       client.logout
