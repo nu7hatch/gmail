@@ -29,15 +29,13 @@ describe "Gmail client (Plain)" do
     end
    
     it "should connect to GMail IMAP service" do 
-      lambda { 
-        client = mock_client
-        client.connect!.should be_true
-      }.should_not raise_error(Gmail::Client::ConnectionError)
+      client = mock_client
+      client.connect!.should be_true
     end
-    
+
     it "should properly login to valid GMail account" do
       client = mock_client
-      client.connect.should be_nil
+      client.connect.should be_true
       client.login.should be_true
       client.should be_logged_in
       client.logout
@@ -47,16 +45,22 @@ describe "Gmail client (Plain)" do
       lambda {
         client = Gmail::Client::Plain.new("foo", "bar")
         client.connect.should be_true
-        client.login!.should_not be_true
-      }.should raise_error(Gmail::Client::AuthorizationError)
+        client.login!.should_not be_nil
+      }.should raise_error(NoMethodError)
     end
     
-    it "shouldn't login when given GMail account is invalid" do
+    it "shouldn't raise error even though GMail account is invalid" do
       lambda {
         client = Gmail::Client::Plain.new("foo", "bar")
         client.connect.should be_true
         client.login.should_not be_true
       }.should_not raise_error(Gmail::Client::AuthorizationError)
+    end
+
+    it "shouldn't login when given GMail account is invalid" do
+      client = Gmail::Client::Plain.new("foo", "bar")
+      client.connect.should be_true
+      client.login.should be_false
     end
     
     it "should properly logout from GMail" do 
@@ -120,17 +124,17 @@ describe "Gmail client (Plain)" do
     
     it "should properly switch to given mailbox" do
       mock_client do |client| 
-        mailbox = client.mailbox("TEST")
+        mailbox = client.mailbox("INBOX")
         mailbox.should be_kind_of(Gmail::Mailbox)
-        mailbox.name.should == "TEST"
+        mailbox.name.should == "INBOX"
       end 
     end
     
     it "should properly switch to given mailbox using block style" do
-      mock_client do |client| 
-        client.mailbox("TEST") do |mailbox|
+      mock_client do |client|
+        client.mailbox("INBOX") do |mailbox|
           mailbox.should be_kind_of(Gmail::Mailbox)
-          mailbox.name.should == "TEST"
+          mailbox.name.should == "INBOX"
         end
       end
     end
@@ -144,12 +148,12 @@ describe "Gmail client (Plain)" do
       
       it "should get list of all available labels" do
         labels = subject
-        labels.all.should include("TEST", "INBOX")
+        labels.all.should include("INBOX")
       end
       
       it "should be able to check if there is given label defined" do
         labels = subject
-        labels.exists?("TEST").should be_true
+        labels.exists?("INBOX").should be_true
         labels.exists?("FOOBAR").should be_false
       end
       
