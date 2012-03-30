@@ -15,6 +15,7 @@ dependencies:
   mime: '>= 0.1'
   mail: '>= 2.2.1'
   gmail_xoauth: '>= 0.3.0'
+  ore-core: '~> 0.1.5'
 
 development_dependencies:
   ore-tasks: '~> 0.4'
