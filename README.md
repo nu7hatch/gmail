@@ -33,7 +33,7 @@ You can install it easy using rubygems:
 
     sudo gem install gmail
     
-Or install it manualy:
+Or install it manually:
 
     git clone git://github.com/nu7hatch/gmail.git
     cd gmail
