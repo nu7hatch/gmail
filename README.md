@@ -215,11 +215,11 @@ Create new label:
     
 Remove labels:
 
-    gmail.labels.delete("Uregent")
+    gmail.labels.delete("Urgent")
     
 Or check if given label exists:
 
-    gmail.labels.exists?("Uregent") # => false
+    gmail.labels.exists?("Urgent") # => false
     gmail.labels.exists?("AnotherOne") # => true
 
 ### Composing and sending emails
