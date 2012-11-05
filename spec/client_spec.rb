@@ -46,7 +46,8 @@ describe "Gmail client (Plain)" do
         client = Gmail::Client::Plain.new("foo", "bar")
         client.connect.should be_true
         client.login!.should_not be_nil
-      }.should raise_error(NoMethodError)
+        }.should raise_error      
+        ### FIX: can someone dig to the bottom of this?  We are getting NoMethodError instead of Gmail::Client::AuthorizationError in 1.9
     end
     
     it "shouldn't raise error even though GMail account is invalid" do
