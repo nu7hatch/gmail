@@ -1,2 +1,6 @@
-- "test@gmail.com"
-- "test"
+plain:
+  - "test@gmail.com"
+  - "test"
+xoauth2:
+  - "test@gmail.com"
+  - :oauth2_token: "testtokenstring"

@@ -6,7 +6,7 @@ module Gmail
       attr_reader :oauth2_token
 
       def initialize(username, options={})
-        @oauth2_token           = options.delete(:oauth2_token)
+        @oauth2_token = options[:oauth2_token]
 
         super(username, options)
       end
@@ -24,9 +24,7 @@ module Gmail
            :port => GMAIL_SMTP_PORT,
            :domain => mail_domain,
            :user_name => username,
-           :password => {
-             :oauth2_token => oauth2_token
-           },
+           :password => oauth2_token,
            :authentication => :xoauth2,
            :enable_starttls_auto => true
          }]
