@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Gmail::Labels do
   context '#localize' do
     context 'when given the XLIST flag ' do
-      [:Inbox, :Allmail, :Drafts, :Sent, :Trash, :Important, :Spam].each do |flag|
+      [:Inbox, :All, :Drafts, :Sent, :Trash, :Important, :Junk, :Flagged].each do |flag|
         context flag do
           it 'localizes into the appropriate label' do
             localized = ""
@@ -16,4 +16,3 @@ describe Gmail::Labels do
     end
   end
 end
-    
