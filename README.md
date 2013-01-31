@@ -222,6 +222,11 @@ Or check if given label exists:
     gmail.labels.exists?("Urgent") # => false
     gmail.labels.exists?("AnotherOne") # => true
 
+Localizing labels:
+
+    gmail.labels.localize(:allmail) # => "[Gmail]\All Mail"
+                                    # => "[Google Mail]\All Mail"
+
 ### Composing and sending emails
 
 Creating emails now uses the amazing [Mail](http://rubygems.org/gems/mail) rubygem. 
