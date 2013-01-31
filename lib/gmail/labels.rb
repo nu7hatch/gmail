@@ -58,5 +58,19 @@ module Gmail
     def inspect
       "#<Gmail::Labels#{'0x%04x' % (object_id << 1)}>"
     end
+
+    # Localizes a specific label flag into a label name
+    # Accepts standard mailbox flags returned by XLIST:
+    # :Inbox, :Allmail, :Drafts, :Sent, :Trash, :Important, :Spam
+    # and their string equivalents. Capitalization agnostic.
+    def localize(label)
+      type = label.to_sym.capitalize
+      if [:Inbox, :Allmail, :Drafts, :Sent, :Trash, :Important, :Spam].include? type
+        @mailboxes ||= connection.xlist("", "*")
+        @mailboxes.select {|box| box.attr.include? type }.collect(&:name).compact.uniq.first
+      else
+        label
+      end
+    end
   end # Labels
 end # Gmail
