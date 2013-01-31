@@ -222,10 +222,11 @@ Or check if given label exists:
     gmail.labels.exists?("Urgent") # => false
     gmail.labels.exists?("AnotherOne") # => true
 
-Localizing labels:
+Localize label names using the LIST special-use extension flags,
+:Inbox, :All, :Drafts, :Sent, :Trash, :Important, :Junk, and :Flagged
 
-    gmail.labels.localize(:allmail) # => "[Gmail]\All Mail"
-                                    # => "[Google Mail]\All Mail"
+    gmail.labels.localize(:all) # => "[Gmail]\All Mail"
+                                # => "[Google Mail]\All Mail"
 
 ### Composing and sending emails
 
