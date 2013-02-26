@@ -2,15 +2,18 @@ require 'mime/message'
 
 module Gmail
   class Message
+    PREFETCH_ATTRS = ["UID", "ENVELOPE", "BODY.PEEK[]", "FLAGS", "X-GM-LABELS"]
+
     # Raised when given label doesn't exists.
     class NoLabelError < Exception; end
 
     attr_reader :uid, :envelope, :message, :flags, :labels
 
-    def initialize(mailbox, uid)
+    def initialize(mailbox, uid, _attrs = nil)
       @uid     = uid
       @mailbox = mailbox
       @gmail   = mailbox.instance_variable_get("@gmail") if mailbox
+      @_attrs  = _attrs
     end
 
     def uid
@@ -185,7 +188,7 @@ module Gmail
     def fetch(value)
       @_attrs ||= begin
         @gmail.mailbox(@mailbox.name) {
-          @gmail.conn.uid_fetch(uid, ["ENVELOPE", "BODY.PEEK[]", "FLAGS", "X-GM-LABELS"])[0]
+          @gmail.conn.uid_fetch(uid, PREFETCH_ATTRS)[0]
         }
       end
 
