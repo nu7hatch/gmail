@@ -2,7 +2,7 @@ require 'mime/message'
 
 module Gmail
   class Message
-    PREFETCH_ATTRS = ["UID", "ENVELOPE", "BODY.PEEK[]", "FLAGS", "X-GM-LABELS"]
+    PREFETCH_ATTRS = ["UID", "ENVELOPE", "BODY.PEEK[]", "FLAGS", "X-GM-LABELS", "X-GM-MSGID"]
 
     # Raised when given label doesn't exists.
     class NoLabelError < Exception; end
@@ -18,6 +18,10 @@ module Gmail
 
     def uid
       @uid ||= fetch("UID")
+    end
+
+    def msg_id
+      @msg_id ||= fetch("X-GM-MSGID")
     end
 
     def envelope
