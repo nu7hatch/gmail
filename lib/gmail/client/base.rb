@@ -67,7 +67,12 @@ module Gmail
         @logged_in = false
       end
       alias :sign_out :logout
-      
+
+      # Disconnect from GMail service.
+      def disconnect
+        @imap && @imap.disconnect
+      end
+
       # Return labels object, which helps you with managing your GMail labels.
       # See <tt>Gmail::Labels</tt> for details.
       def labels
