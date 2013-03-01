@@ -42,6 +42,7 @@ module Gmail
         opts[:attachment] and search.concat ['HAS', 'attachment']
         opts[:search]     and search.concat ['BODY', opts[:search]]
         opts[:body]       and search.concat ['BODY', opts[:body]]
+        opts[:uid]        and search.concat ['UID', opts[:uid]]
         opts[:query]      and search.concat opts[:query]
 
         @gmail.mailbox(name) {
