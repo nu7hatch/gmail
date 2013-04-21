@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'rubygems'
 require 'rspec'
-require 'mocha'
+require 'mocha/api'
 require 'yaml'
 require 'gmail'
 
@@ -12,7 +12,7 @@ RSpec.configure do |config|
 end
 
 def within_gmail(&block)
-  gmail = Gmail.connect!(*TEST_ACCOUNT)
+  gmail = Gmail.connect!(*TEST_ACCOUNT["plain"])
   yield(gmail)
   gmail.logout if gmail
 end

@@ -1,4 +1,5 @@
 require 'thread'
+require_relative 'imap_extensions'
 
 module Gmail
   module Client
@@ -24,7 +25,6 @@ module Gmail
       # Connect to gmail service. 
       def connect(raise_errors=false)
         @imap = Net::IMAP.new(GMAIL_IMAP_HOST, GMAIL_IMAP_PORT, true, nil, false)
-        GmailImapExtensions.patch_net_imap_response_parser
       rescue SocketError
         raise_errors and raise ConnectionError, "Couldn't establish connection with GMail IMAP service"
       end

@@ -19,7 +19,7 @@ describe "Gmail client (Plain)" do
   
   context "instance" do
     def mock_client(&block) 
-      client = Gmail::Client::Plain.new(*TEST_ACCOUNT)
+      client = Gmail::Client::Plain.new(*TEST_ACCOUNT["plain"])
       if block_given?
         client.connect
         yield client
@@ -87,17 +87,17 @@ describe "Gmail client (Plain)" do
     
     it "#compose should automatically add `from` header when it is not specified" do
       mail = mock_client.compose
-      mail.from.should == [TEST_ACCOUNT[0]]
+      mail.from.should == [TEST_ACCOUNT["plain"][0]]
       mail = mock_client.compose(Mail.new)
-      mail.from.should == [TEST_ACCOUNT[0]]
+      mail.from.should == [TEST_ACCOUNT["plain"][0]]
       mail = mock_client.compose {}
-      mail.from.should == [TEST_ACCOUNT[0]]
+      mail.from.should == [TEST_ACCOUNT["plain"][0]]
     end
     
     it "should deliver inline composed email" do
       mock_client do |client|
         client.deliver do 
-          to TEST_ACCOUNT[0]
+          to TEST_ACCOUNT["plain"][0]
           subject "Hello world!"
           body "Yeah, hello there!"
         end.should be_true
@@ -137,7 +137,7 @@ describe "Gmail client (Plain)" do
     
     context "labels" do
       subject { 
-        client = Gmail::Client::Plain.new(*TEST_ACCOUNT)
+        client = Gmail::Client::Plain.new(*TEST_ACCOUNT["plain"])
         client.connect
         client.labels
       }
