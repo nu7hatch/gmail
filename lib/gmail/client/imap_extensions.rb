@@ -1,7 +1,7 @@
 # Modified from http://apidock.com/ruby/v1_9_3_125/Net/IMAP/ResponseParser/msg_att
 # https://github.com/nu7hatch/gmail/issues/78
 class Net::IMAP::ResponseParser
-  def msg_att
+  def msg_att(n = -1)
     match(T_LPAR)
     attr = {}
     while true
@@ -36,7 +36,7 @@ class Net::IMAP::ResponseParser
       when /\A(?:X-GM-THRID)\z/i
         name, val = uid_data
       else
-        parse_error("unknown attribute `%s'", token.value)
+        parse_error("unknown attribute `%s' for {%d}", token.value, n)
       end
       attr[name] = val
     end
