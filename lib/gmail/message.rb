@@ -104,7 +104,6 @@ module Gmail
 
     # Move to trash / bin.
     def delete!
-      @mailbox.emails.delete(uid)
       flag(:deleted)
 
       # For some, it's called "Trash", for others, it's called "Bin". Support both.
