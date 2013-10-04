@@ -73,6 +73,25 @@ describe "Gmail client (Plain)" do
         client.connection.should_not be_nil
       end
     end
+
+    it "should be able to wait for messages using IMAP idle" do
+      mock_client do |client|
+        t = Thread.new do
+          client.idle.should_not be nil
+        end
+
+        client.deliver do
+          to TEST_ACCOUNT[0]
+          subject "imap idle test"
+          text_part do 
+            body "hullo"
+          end
+        end
+
+        t.join
+      end
+    end
+    
     
     it "should properly compose message" do 
       mail = mock_client.compose do
@@ -134,7 +153,8 @@ describe "Gmail client (Plain)" do
         end
       end
     end
-    
+
+
     context "labels" do
       subject { 
         client = Gmail::Client::Plain.new(*TEST_ACCOUNT)
