@@ -23,3 +23,5 @@ pkg
 
 ## Test Account details
 spec/account.yml
+
+Gemfile.lock

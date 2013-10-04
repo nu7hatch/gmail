@@ -190,6 +190,39 @@ module Gmail
         username =~ /@/ ? username : "#{username}@gmail.com"
       end
 
+      # Use IMAP idle to wait for new messages (can be help avoid polling)
+      #  
+      # Times out after 30 minutes, currently not handled
+      #
+      # Adapted from https://otokar.looc2011.eu/idlewatch.html
+      # 
+      # ==== Examples
+      #
+      #   gmail.idle
+      #   mailbox = gmail.mailbox("INBOX")
+      #   mailbox.emails.last # => guaranteed to be new 
+      #   
+      def idle
+        imap = conn
+        imap.select "[Gmail]/All Mail"
+
+        imap.idle do |resp|
+
+          if resp.kind_of?(Net::IMAP::ContinuationRequest) and resp.data.text == 'idling'
+            # puts "Starting idle loop over"
+          elsif resp.kind_of?(Net::IMAP::UntaggedResponse) and resp.name == 'EXISTS'
+            if block_given?
+              yield resp
+            else
+              imap.idle_done
+              resp
+            end
+          end
+        end
+      end
+      alias :watch :idle
+      alias :wait :idle
+
       def mail_domain
         username.split('@').last
       end
