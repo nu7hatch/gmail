@@ -1,5 +1,9 @@
 # Gmail gem changelog
 
+## Unreleased
+
+* Remove legacy dependency on MIME gem (Johnny Shields)
+
 ## 0.4.0
 
 * Added XOAUTH authentication method (Thanks Stefano Bernardi and Nicolas Fouché)

@@ -7,7 +7,7 @@ require 'mocha'
 require 'yaml'
 require 'gmail'
 
-RSpec.configure do |config| 
+RSpec.configure do |config|
   config.mock_with :mocha
 end
 
@@ -17,9 +17,9 @@ def within_gmail(&block)
   gmail.logout if gmail
 end
 
-def mock_mailbox(box="INBOX", &block)
+def live_mailbox(box="INBOX", &block)
   within_gmail do |gmail|
-    mailbox = subject.new(gmail, box)
+    mailbox = Gmail::Mailbox.new(gmail, box)
     yield(mailbox) if block_given?
     mailbox
   end
