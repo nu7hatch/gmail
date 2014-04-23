@@ -26,7 +26,7 @@ describe "Any object" do
     lambda { 
       gmail = Gmail.new("foo", "bar")
       gmail.should_not be_logged_in 
-    }.should_not raise_error(Gmail::Client::AuthorizationError)
+    }.should_not raise_error
   end
 
   it "#new! should raise error when couldn't connect with given account" do
