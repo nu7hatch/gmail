@@ -33,7 +33,7 @@ You can install it easy using rubygems:
 
     sudo gem install gmail
     
-Or install it manualy:
+Or install it manually:
 
     git clone git://github.com/nu7hatch/gmail.git
     cd gmail
@@ -142,7 +142,7 @@ You can use also one of aliases:
     
 Also you can manipulate each message using block style:
 
-    gmail.inbox.find(:unread) do |email|
+    gmail.inbox.find(:unread).each do |email|
       email.read!
     end
     
@@ -150,7 +150,7 @@ Also you can manipulate each message using block style:
 
 Any news older than 4-20, mark as read and archive it:
 
-    gmail.inbox.find(:before => Date.parse("2010-04-20"), :from => "news@nbcnews.com") do |email|
+    gmail.inbox.find(:before => Date.parse("2010-04-20"), :from => "news@nbcnews.com").each do |email|
       email.read! # can also unread!, spam! or star!
       email.archive!
     end
@@ -164,7 +164,7 @@ Delete emails from X:
 Save all attachments in the "Faxes" label to a local folder:
 
     folder = "/where/ever"
-    gmail.mailbox("Faxes").emails do |email|
+    gmail.mailbox("Faxes").emails.each do |email|
       if !email.message.attachments.empty?
         email.message.save_attachments_to(folder)
       end
@@ -215,11 +215,11 @@ Create new label:
     
 Remove labels:
 
-    gmail.labels.delete("Uregent")
+    gmail.labels.delete("Urgent")
     
 Or check if given label exists:
 
-    gmail.labels.exists?("Uregent") # => false
+    gmail.labels.exists?("Urgent") # => false
     gmail.labels.exists?("AnotherOne") # => true
 
 ### Composing and sending emails

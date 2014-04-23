@@ -38,7 +38,7 @@ module GmailImapExtensions
           when /\A(?:X-GM-LABELS)\z/ni
             name, val = flags_data
           when /\A(?:X-GM-MSGID)\z/ni 
-            name, vale = uid_data
+            name, val = uid_data
           when /\A(?:X-GM-THRID)\z/ni 
             name, val = uid_data
           else
