@@ -54,8 +54,8 @@ describe "Gmail client (Plain)" do
       lambda {
         client = Gmail::Client::Plain.new("foo", "bar")
         client.connect.should be_true
-        client.login.should_not be_true
-      }.should_not raise_error(Gmail::Client::AuthorizationError)
+        expect(client.login).to_not be_true
+      }.should_not raise_error
     end
 
     it "shouldn't login when given GMail account is invalid" do
@@ -113,7 +113,7 @@ describe "Gmail client (Plain)" do
       lambda { 
         client = mock_client
         client.deliver(Mail.new {}).should be_false
-      }.should_not raise_error(Gmail::Client::DeliveryError)
+      }.should_not raise_error
     end
     
     it "should raise error when mail can't be delivered and errors are disabled" do 
