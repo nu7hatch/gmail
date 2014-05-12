@@ -43,7 +43,6 @@ To install gmail gem you have to met following requirements (with rubygems all
 will be installed automatically):
 
 * mail
-* mime
 * smpt_tls (Ruby < 1.8.7)
 
 ## Features

@@ -15,17 +15,16 @@ Gem::Specification.new do |s|
   s.authors = ["Chris Kowalik"]
   s.email = ["chris@nu7hat.ch"]
   s.homepage = "http://github.com/nu7hatch/gmail"
-  
+
   # runtime dependencies
-  s.add_dependency "mime", ">= 0.1"
   s.add_dependency "mail", ">= 2.2.1"
   s.add_dependency "gmail_xoauth", ">= 0.3.0"
-  
+
   # development dependencies
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec", "~> 2.0"
   s.add_development_dependency "mocha", ">= 0.9"
-  
+
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }

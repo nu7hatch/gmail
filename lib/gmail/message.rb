@@ -1,5 +1,3 @@
-require 'mime/message'
-
 module Gmail
   class Message
     PREFETCH_ATTRS = ["UID", "ENVELOPE", "BODY.PEEK[]", "FLAGS", "X-GM-LABELS", "X-GM-MSGID"]
