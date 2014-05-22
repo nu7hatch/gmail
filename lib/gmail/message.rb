@@ -1,5 +1,3 @@
-require 'mime/message'
-
 module Gmail
   class Message
     # Raised when given label doesn't exists.
