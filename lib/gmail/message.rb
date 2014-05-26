@@ -10,13 +10,25 @@ module Gmail
       @mailbox = mailbox
       @gmail   = mailbox.instance_variable_get("@gmail") if mailbox
     end
-        
+    
+    ###
+    # Returns the email labels. Read more about this extension in the following link:
+    #   https://developers.google.com/google-apps/gmail/imap_extensions#access_to_the_gmail_thread_id_x-gm-thrid
+    #
     def labels
-      @gmail.conn.uid_fetch(uid, "X-GM-LABELS")[0].attr["X-GM-LABELS"]
+      fetch_email_data.attr["X-GM-LABELS"]
+    end
+    
+    ###
+    # Returns the thread id. Read more about this extension in the following link:
+    #   https://developers.google.com/google-apps/gmail/imap_extensions#access_to_the_gmail_thread_id_x-gm-thrid
+    #
+    def thread_id
+      fetch_email_data.attr["X-GM-THRID"]
     end
    
     def uid
-      @uid ||= @gmail.conn.uid_search(['HEADER', 'Message-ID', message_id])[0]
+      @uid ||= fetch_email_data.attr("UID")
     end
     
     # Mark message with given flag.
@@ -151,16 +163,21 @@ module Gmail
 
     def envelope
       @envelope ||= @gmail.mailbox(@mailbox.name) {
-        @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"]
+        fetch_email_data.attr["ENVELOPE"]
       }
     end
     
     def message
       @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
-        @gmail.conn.uid_fetch(uid, "RFC822")[0].attr["RFC822"] # RFC822
+        fetch_email_data.attr["RFC822"] # RFC822
       })
     end
     alias_method :raw_message, :message
 
+    protected 
+    # Just one request to fetch all the data we need
+    def fetch_email_data
+      @email_data ||= @gmail.conn.uid_fetch(uid, ["RFC822", 'ENVELOPE', 'X-GM-LABELS', 'X-GM-THRID'])[0]
+    end
   end # Message
 end # Gmail
