@@ -153,7 +153,7 @@ module Gmail
       #   end
       def mailbox(name, &block)
         @mailbox_mutex.synchronize do
-          name = name.to_s
+          name = labels.localize(name)
           mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
           switch_to_mailbox(name) if @current_mailbox != name
 
