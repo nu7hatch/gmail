@@ -23,8 +23,9 @@ Gem::Specification.new do |s|
   
   # development dependencies
   s.add_development_dependency "rake"
-  s.add_development_dependency "rspec", "~> 2.0"
-  s.add_development_dependency "mocha", ">= 0.9"
+  s.add_development_dependency "rdoc", "~> 2.4.2"
+  s.add_development_dependency "rspec", "~> 2.14.0"
+  s.add_development_dependency "mocha", "~> 1.0.0"
   
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
