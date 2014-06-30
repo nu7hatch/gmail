@@ -134,7 +134,7 @@ module Gmail
     #
     # See also <tt>Gmail::Message#label!</tt>.
     def label(name, from=nil)
-      @gmail.mailbox(Net::IMAP.encode_utf7(from || @mailbox.external_name)) {
+      @gmail.mailbox(from || @mailbox.name) {
         @gmail.conn.uid_copy(uid, Net::IMAP.encode_utf7(name))
       }
     rescue Net::IMAP::NoResponseError
@@ -148,7 +148,7 @@ module Gmail
     def label!(name, from=nil)
       label(name, from)
     rescue NoLabelError
-      @gmail.labels.add(Net::IMAP.encode_utf7(name))
+      @gmail.labels.add(name)
       label(name, from)
     end
     alias :add_label :label!
@@ -161,7 +161,7 @@ module Gmail
     alias :delete_label! :remove_label!
 
     def inspect
-      "#<Gmail::Message#{'0x%04x' % (object_id << 1)} mailbox=#{@mailbox.external_name}#{' uid='+@uid.to_s if @uid}#{' message_id='+@message_id.to_s if @message_id}>"
+      "#<Gmail::Message#{'0x%04x' % (object_id << 1)} mailbox=#{@mailbox.name}#{' uid='+@uid.to_s if @uid}#{' message_id='+@message_id.to_s if @message_id}>"
     end
 
     def method_missing(meth, *args, &block)
