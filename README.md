@@ -39,11 +39,11 @@ Or install it manually:
     cd gmail
     rake install
 
-To install gmail gem you have to met following requirements (with rubygems all 
-will be installed automatically):
+gmail gem has the following dependencies (with Bundler all will be installed automatically):
 
-* mail
+* mail (Ruby 1.8.7 users should lock mail gem version at 2.5.3)
 * mime
+* gmail_xoauth
 * smpt_tls (Ruby < 1.8.7)
 
 ## Features
