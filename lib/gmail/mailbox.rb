@@ -58,6 +58,7 @@ module Gmail
         opts[:search]     and search.concat ['BODY', opts[:search]]
         opts[:body]       and search.concat ['BODY', opts[:body]]
         opts[:query]      and search.concat opts[:query]
+        opts[:gm]         and search.concat ['X-GM-RAW', opts[:gm]]
 
         @gmail.mailbox(name) do
           @gmail.conn.uid_search(search).collect do |uid| 
