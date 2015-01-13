@@ -4,7 +4,7 @@ module GmailImapExtensions
 
   def self.patch_net_imap_response_parser(klass = Net::IMAP::ResponseParser)
     klass.class_eval do
-      def msg_att
+      def msg_att(n)
         match(Net::IMAP::ResponseParser::T_LPAR)
         attr = {}
         while true
@@ -42,7 +42,7 @@ module GmailImapExtensions
           when /\A(?:X-GM-THRID)\z/ni 
             name, val = uid_data
           else
-            parse_error("unknown attribute `%s'", token.value)
+            parse_error("unknown attribute `%s'", token.value, n)
           end
           attr[name] = val
         end
