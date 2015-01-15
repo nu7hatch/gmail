@@ -74,7 +74,7 @@ describe "Gmail client (Plain)" do
     
     it "#connection should automatically log in to GMail account when it's called" do
       mock_client do |client|
-        client.expects(:login).once.returns(false)
+        expect(client).to receive(:login).once.and_return(false)
         client.connection.should_not be_nil
       end
     end

@@ -3,12 +3,10 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'rubygems'
 require 'rspec'
-require 'mocha'
 require 'yaml'
 require 'gmail'
 
-RSpec.configure do |config| 
-  config.mock_with :mocha
+RSpec.configure do |config|
 end
 
 def within_gmail(&block)
