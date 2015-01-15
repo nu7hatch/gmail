@@ -17,7 +17,6 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/nu7hatch/gmail"
   
   # runtime dependencies
-  s.add_dependency "mime", ">= 0.1"
   s.add_dependency "mail", ">= 2.2.1"
   s.add_dependency "gmail_xoauth", ">= 0.3.0"
   
