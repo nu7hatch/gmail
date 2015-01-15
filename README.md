@@ -265,6 +265,12 @@ Or, compose the message first and send it later
     end
     email.deliver! # or: gmail.deliver(email)
 
+## Troubleshooting
+
+If you are having trouble connecting to Gmail:
+* Please ensure your account is verified
+* In [Gmail Security Settings](https://www.google.com/settings/security), enable access for less secure applications.
+
 ## Note on Patches/Pull Requests
  
 * Fork the project.
