@@ -15,6 +15,16 @@ def within_gmail(&block)
   gmail.logout if gmail
 end
 
+def mock_client(&block) 
+  client = Gmail::Client::Plain.new(*TEST_ACCOUNT)
+  if block_given?
+    client.connect
+    yield client
+    client.logout
+  end
+  client
+end
+
 def mock_mailbox(box="INBOX", &block)
   within_gmail do |gmail|
     mailbox = subject.new(gmail, box)

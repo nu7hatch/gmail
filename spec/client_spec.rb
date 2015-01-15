@@ -17,17 +17,7 @@ describe "Gmail client (Plain)" do
     end
   end
   
-  context "instance" do
-    def mock_client(&block) 
-      client = Gmail::Client::Plain.new(*TEST_ACCOUNT)
-      if block_given?
-        client.connect
-        yield client
-        client.logout
-      end
-      client
-    end
-   
+  context "instance" do   
     it "should connect to GMail IMAP service" do 
       client = mock_client
       client.connect!.should be_truthy

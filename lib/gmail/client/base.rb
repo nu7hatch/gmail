@@ -1,5 +1,4 @@
 require 'thread'
-require_relative 'imap_extensions'
 
 module Gmail
   module Client
@@ -160,7 +159,7 @@ module Gmail
       #   end
       def mailbox(name, &block)
         @mailbox_mutex.synchronize do
-          name = Net::IMAP.decode_utf7(name.to_s)
+          name = labels.localize(name)
           mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
           switch_to_mailbox(mailbox) if @current_mailbox != mailbox
 
