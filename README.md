@@ -148,12 +148,26 @@ Delete emails from X:
       email.delete!
     end
 
-Save all attachments in the "Faxes" label to a local folder:
+Save all attachments in the "Faxes" label to a local folder (uses functionality from `Mail` gem):
 
     folder = "/where/ever"
     gmail.mailbox("Faxes").emails.each do |email|
-      if !email.message.attachments.empty?
-        email.message.save_attachments_to(folder)
+      puts email.message.subject
+      if email.message.has_attachments?
+        email.attachments.each do | attachment |
+          # Attachments is an AttachmentsList object containing a
+          # number of Part objects
+          if (attachment.content_type.start_with?('image/'))
+            # extracting images for example...
+            filename = attachment.filename
+            puts filename
+            begin
+              File.open(images_dir + filename, "w+b", 0644) {|f| f.write attachment.body.decoded}
+            rescue Exception => e
+              puts "Unable to save data for #{filename} because #{e.message}"
+            end
+          end
+        end
       end
     end
      
