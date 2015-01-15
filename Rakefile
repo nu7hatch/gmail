@@ -33,3 +33,10 @@ rescue LoadError
 end
 
 task :default => :spec
+
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+require 'spec/obfuscation'
+desc 'Obfuscates account.yml file.'
+task :obfuscate do
+  Spec::Obfuscation.encrypt_file(File.join(File.dirname(__FILE__), 'spec', 'account.yml'))
+end
