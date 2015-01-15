@@ -1,5 +1,18 @@
 # Gmail gem changelog
 
+## Unreleased
+
+* Fix IMAP library patch on Ruby 2 (@bootstraponline, @johnnyshields)
+* Implement Travis CI (@johnnyshields)
+
+## 0.4.2
+
+* Fix issue related to Mail gem version lock (@johnnyshields)
+
+## 0.4.1
+
+* n/a
+
 ## 0.4.0
 
 * Added XOAUTH authentication method (Thanks Stefano Bernardi and Nicolas Fouché)
