@@ -10,26 +10,6 @@ and manage labels.
 It's based on Daniel Parker's ruby-gmail gem. This version has more friendly
 API, is well tested, better documented and have many other improvements.
 
-## Author(s)
-
-* Kriss 'nu7hatch' Kowalik
-* [Daniel Parker of BehindLogic.com](http://github.com/dcparker)
-
-Extra thanks for specific feature contributions from:
-
-* [abhishiv](http://github.com/abhishiv)
-* [Michael Young](http://github.com/myoung8)
-* [Nicolas Fouché](http://github.com/nfo)
-* [Stefano Bernardi](http://github.com/stefanobernardi)
-* [Benjamin Bock](http://github.com/bb)
-* [Arthur Chiu](http://github.com/achiu)
-* [Justin Perkins](http://github.com/justinperkins)
-* [Mikkel Malmberg](http://github.com/mikker)
-* [Julien Blanchard](http://github.com/julienXX)
-* [Federico Galassi](http://github.com/fgalassi)
-* [Alex Genco](http://github.com/alexgenco)
-* [Justin Grevich](http://github.com/jgrevich)
-
 ## Installation
 
 You can install it easy using rubygems:
@@ -280,6 +260,27 @@ If you are having trouble connecting to Gmail:
 * Commit, do not mess with rakefile, version, or history.
   (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
+
+## Author(s)
+
+* Kriss 'nu7hatch' Kowalik
+* [Daniel Parker of BehindLogic.com](http://github.com/dcparker)
+
+Extra thanks for specific feature contributions from:
+
+* [abhishiv](http://github.com/abhishiv)
+* [Michael Young](http://github.com/myoung8)
+* [Nicolas Fouché](http://github.com/nfo)
+* [Stefano Bernardi](http://github.com/stefanobernardi)
+* [Benjamin Bock](http://github.com/bb)
+* [Arthur Chiu](http://github.com/achiu)
+* [Justin Perkins](http://github.com/justinperkins)
+* [Mikkel Malmberg](http://github.com/mikker)
+* [Julien Blanchard](http://github.com/julienXX)
+* [Federico Galassi](http://github.com/fgalassi)
+* [Alex Genco](http://github.com/alexgenco)
+* [Justin Grevich](http://github.com/jgrevich)
+* [Johnny Shields](http://github.com/johnnyshields)
 
 ## Copyright
 
