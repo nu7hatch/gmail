@@ -1,4 +1,5 @@
 require 'base64'
+require 'yaml'
 
 # Lightweight obfuscation wrapper used to obfuscate account.yml file.
 #
@@ -34,7 +35,7 @@ module Spec
     def decrypt_file(file)
       data = read_if_exist!(file)
       begin
-        return YAML::load(decrypt(data))
+        return ::YAML::load(decrypt(data))
       rescue Exception => e
         raise "Unable to decrypt #{file}"
       end
