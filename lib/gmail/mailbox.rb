@@ -9,44 +9,29 @@ module Gmail
       :flagged   => ['FLAGGED'],
       :unflagged => ['UNFLAGGED'],
       :starred   => ['FLAGGED'],
-      :unstarred => ['UNFLAGGED'], 
+      :unstarred => ['UNFLAGGED'],
       :deleted   => ['DELETED'],
       :undeleted => ['UNDELETED'],
       :draft     => ['DRAFT'],
       :undrafted => ['UNDRAFT']
     }
-  
+
     attr_reader :name
-    attr_reader :external_name
+    attr_reader :encoded_name
 
     def initialize(gmail, name="INBOX")
-      @name  = name
-      @external_name = Net::IMAP.decode_utf7(name)
+      @name = Net::IMAP.decode_utf7(name)
+      @encoded_name = Net::IMAP.encode_utf7(name)
       @gmail = gmail
     end
 
-    # Returns list of emails which meets given criteria. 
-    #
-    # ==== Examples
-    #
-    #   gmail.inbox.emails(:all)
-    #   gmail.inbox.emails(:unread, :from => "friend@gmail.com")
-    #   gmail.inbox.emails(:all, :after => Time.now-(20*24*3600))
-    #   gmail.mailbox("Test").emails(:read)
-    #
-    #   gmail.mailbox("Test") do |box| 
-    #     box.emails(:read)
-    #     box.emails(:unread) do |email|
-    #       ... do something with each email...
-    #     end
-    #   end
-    def emails(*args, &block)
+    def fetch_uids(*args)
       args << :all if args.size == 0
 
-      if args.first.is_a?(Symbol) 
+      if args.first.is_a?(Symbol)
         search = MAILBOX_ALIASES[args.shift].dup
         opts = args.first.is_a?(Hash) ? args.first : {}
-        
+
         opts[:after]      and search.concat ['SINCE', opts[:after].to_imap_date]
         opts[:before]     and search.concat ['BEFORE', opts[:before].to_imap_date]
         opts[:on]         and search.concat ['ON', opts[:on].to_imap_date]
@@ -57,28 +42,65 @@ module Gmail
         opts[:attachment] and search.concat ['HAS', 'attachment']
         opts[:search]     and search.concat ['BODY', opts[:search]]
         opts[:body]       and search.concat ['BODY', opts[:body]]
+        opts[:uid]        and search.concat ['UID', opts[:uid]]
         opts[:query]      and search.concat opts[:query]
 
-        @gmail.mailbox(name) do
-          @gmail.conn.uid_search(search).collect do |uid| 
-            message = (messages[uid] ||= Message.new(self, uid))
-            block.call(message) if block_given?
-            message
-          end
-        end
+        @gmail.mailbox(name) {
+          @gmail.conn.uid_search(search)
+        }
       elsif args.first.is_a?(Hash)
-        emails(:all, args.first)
+        fetch_uids(:all, args.first)
       else
         raise ArgumentError, "Invalid search criteria"
       end
     end
-    alias :mails :emails
+
+    # Returns list of emails which meets given criteria.
+    #
+    # ==== Examples
+    #
+    #   gmail.inbox.emails(:all)
+    #   gmail.inbox.emails(:unread, :from => "friend@gmail.com")
+    #   gmail.inbox.emails(:all, :after => Time.now-(20*24*3600))
+    #   gmail.mailbox("Test").emails(:read)
+    #
+    #   gmail.mailbox("Test") do |box|
+    #     box.emails(:read)
+    #     box.emails(:unread) do |email|
+    #       ... do something with each email...
+    #     end
+    #   end
+    def emails(*args, &block)
+      fetch_uids(*args).collect do |uid|
+        message = Message.new(self, uid)
+        yield(message) if block_given?
+        message
+      end
+    end
     alias :search :emails
     alias :find :emails
-    alias :filter :emails
 
-    # This is a convenience method that really probably shouldn't need to exist, 
-    # but it does make code more readable, if seriously all you want is the count 
+    def emails_in_batches(*args, &block)
+      messages = Array.new
+
+      uids = fetch_uids(*args)
+      if uids && uids.any?
+        uids.each_slice(100) do |slice|
+          @gmail.conn.uid_fetch(slice, Message::PREFETCH_ATTRS).each do |data|
+            message = Message.new(self, nil, data)
+            yield(message) if block_given?
+            messages << message
+          end
+        end
+      end
+
+      messages
+    end
+    alias :search_in_batches :emails_in_batches
+    alias :find_in_batches :emails_in_batches
+
+    # This is a convenience method that really probably shouldn't need to exist,
+    # but it does make code more readable, if seriously all you want is the count
     # of messages.
     #
     # ==== Examples
@@ -95,13 +117,8 @@ module Gmail
       @gmail.mailbox(name) { @gmail.conn.expunge }
     end
 
-    # Cached messages. 
-    def messages
-      @messages ||= {}
-    end
-    
     def inspect
-      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{external_name}>"
+      "#<Gmail::Mailbox#{'0x%04x' % (object_id << 1)} name=#{name}>"
     end
 
     def to_s

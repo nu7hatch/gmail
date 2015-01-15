@@ -6,10 +6,8 @@ require 'gmail/client/imap_extensions'
 describe 'imap patch' do
 
   it 'should not modify arity' do
-    old_arity = Net::IMAP::ResponseParser.new.method(:msg_att).arity
     GmailImapExtensions::patch_net_imap_response_parser
-    new_arity = Net::IMAP::ResponseParser.new.method(:msg_att).arity
-
-    expect(old_arity).to eq(new_arity)
+    expect(Net::IMAP::ResponseParser.new).to respond_to(:msg_att).with(0).arguments
+    expect(Net::IMAP::ResponseParser.new).to respond_to(:msg_att).with(1).arguments
   end
 end

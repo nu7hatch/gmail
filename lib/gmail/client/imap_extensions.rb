@@ -4,9 +4,8 @@ module GmailImapExtensions
   def self.patch_net_imap_response_parser(klass = Net::IMAP::ResponseParser)
 
     # https://github.com/ruby/ruby/blob/4d426fc2e03078d583d5d573d4863415c3e3eb8d/lib/net/imap.rb#L2258
-    args = Net::IMAP::ResponseParser.instance_method(:msg_att).arity == 1 ? [:n] : []
     klass.class_eval do
-      define_method :msg_att do |*args|
+      def msg_att(n = -1)
         match(Net::IMAP::ResponseParser::T_LPAR)
         attr = {}
         while true

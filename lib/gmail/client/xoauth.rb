@@ -13,7 +13,7 @@ module Gmail
         @secret          = options.delete(:secret)
         @consumer_key    = options.delete(:consumer_key)
         @consumer_secret = options.delete(:consumer_secret)
-       
+
         super(username, options)
       end
 
@@ -24,8 +24,12 @@ module Gmail
           :token           => token,
           :token_secret    => secret
         )) && login.name == 'OK'
-      rescue
-        raise_errors and raise AuthorizationError, "Couldn't login to given GMail account: #{username}"        
+      rescue Net::IMAP::NoResponseError => e
+        if raise_errors
+          message = "Couldn't login to given GMail account: #{username}"
+          message += " (#{e.response.data.text.strip})"
+          raise(AuthorizationError.new(e.response), message, e.backtrace)
+        end
       end
 
       def smtp_settings

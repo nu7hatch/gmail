@@ -1,35 +1,59 @@
 module Gmail
   class Message
+    PREFETCH_ATTRS = ["UID", "ENVELOPE", "BODY.PEEK[]", "FLAGS", "X-GM-LABELS", "X-GM-MSGID"]
+
     # Raised when given label doesn't exists.
-    class NoLabelError < Exception; end 
-  
-    attr_reader :uid
-    
-    def initialize(mailbox, uid)
+    class NoLabelError < Exception; end
+
+    attr_reader :uid, :envelope, :message, :flags, :labels
+
+    def initialize(mailbox, uid, _attrs = nil)
       @uid     = uid
       @mailbox = mailbox
       @gmail   = mailbox.instance_variable_get("@gmail") if mailbox
+      @_attrs  = _attrs
     end
-        
-    def labels
-      @gmail.conn.uid_fetch(uid, "X-GM-LABELS")[0].attr["X-GM-LABELS"]
-    end
-   
+
     def uid
-      @uid ||= @gmail.conn.uid_search(['HEADER', 'Message-ID', message_id])[0]
+      @uid ||= fetch("UID")
     end
-    
+
+    def msg_id
+      @msg_id ||= fetch("X-GM-MSGID")
+    end
+
+    def envelope
+      @envelope ||= fetch("ENVELOPE")
+    end
+
+    def message
+      @message ||= Mail.new(fetch("BODY[]"))
+    end
+    alias_method :raw_message, :message
+
+    def flags
+      @flags ||= fetch("FLAGS")
+    end
+
+    def labels
+      @labels ||= fetch("X-GM-LABELS")
+    end
+
     # Mark message with given flag.
     def flag(name)
-      !!@gmail.mailbox(@mailbox.name) { @gmail.conn.uid_store(uid, "+FLAGS", [name]) }
+      !!@gmail.mailbox(@mailbox.name) {
+        @gmail.conn.uid_store(uid, "+FLAGS", [name])
+      }
     end
-    
-    # Unmark message. 
+
+    # Unmark message.
     def unflag(name)
-      !!@gmail.mailbox(@mailbox.name) { @gmail.conn.uid_store(uid, "-FLAGS", [name]) }
+      !!@gmail.mailbox(@mailbox.name) {
+        @gmail.conn.uid_store(uid, "-FLAGS", [name])
+      }
     end
-    
-    # Do commonly used operations on message. 
+
+    # Do commonly used operations on message.
     def mark(flag)
       case flag
         when :read    then read!
@@ -40,32 +64,42 @@ module Gmail
         flag(flag)
       end
     end
-    
+
     # Mark this message as a spam.
     def spam!
       move_to('[Gmail]/Spam')
     end
-    
+
+    # Check whether message is read
+    def read?
+      flags.include?(:Seen)
+    end
+
     # Mark as read.
     def read!
       flag(:Seen)
     end
-    
+
     # Mark as unread.
     def unread!
       unflag(:Seen)
     end
-    
+
+    # Check whether message is starred
+    def starred?
+      flags.include?(:Flagged)
+    end
+
     # Mark message with star.
     def star!
       flag('[Gmail]/Starred')
     end
-    
+
     # Remove message from list of starred.
     def unstar!
       unflag('[Gmail]/Starred')
     end
-    
+
     # Move to trash / bin.
     def delete!
       @mailbox.messages.delete(uid)
@@ -80,54 +114,56 @@ module Gmail
     def archive!
       move_to('[Gmail]/All Mail')
     end
-    
-    # Move to given box and delete from others.  
+
+    # Move to given box and delete from others.
     def move_to(name, from=nil)
       label(name, from)
       delete! if !%w[[Gmail]/Bin [Gmail]/Trash].include?(name)
     end
     alias :move :move_to
-    
-    # Move message to given and delete from others. When given mailbox doesn't 
-    # exist then it will be automaticaly created. 
+
+    # Move message to given and delete from others. When given mailbox doesn't
+    # exist then it will be automaticaly created.
     def move_to!(name, from=nil)
       label!(name, from) && delete!
     end
     alias :move! :move_to!
-    
+
     # Mark this message with given label. When given label doesn't exist then
-    # it will raise <tt>NoLabelError</tt>. 
+    # it will raise <tt>NoLabelError</tt>.
     #
     # See also <tt>Gmail::Message#label!</tt>.
     def label(name, from=nil)
-      @gmail.mailbox(Net::IMAP.encode_utf7(from || @mailbox.external_name)) { @gmail.conn.uid_copy(uid, Net::IMAP.encode_utf7(name)) }
+      @gmail.mailbox(from || @mailbox.name) {
+        @gmail.conn.uid_copy(uid, Net::IMAP.encode_utf7(name))
+      }
     rescue Net::IMAP::NoResponseError
       raise NoLabelError, "Label '#{name}' doesn't exist!"
     end
 
     # Mark this message with given label. When given label doesn't exist then
-    # it will be automaticaly created. 
+    # it will be automaticaly created.
     #
     # See also <tt>Gmail::Message#label</tt>.
     def label!(name, from=nil)
-      label(name, from) 
+      label(name, from)
     rescue NoLabelError
-      @gmail.labels.add(Net::IMAP.encode_utf7(name))
+      @gmail.labels.add(name)
       label(name, from)
     end
     alias :add_label :label!
     alias :add_label! :label!
-    
-    # Remove given label from this message. 
+
+    # Remove given label from this message.
     def remove_label!(name)
       move_to('[Gmail]/All Mail', name)
     end
     alias :delete_label! :remove_label!
-    
+
     def inspect
-      "#<Gmail::Message#{'0x%04x' % (object_id << 1)} mailbox=#{@mailbox.external_name}#{' uid='+@uid.to_s if @uid}#{' message_id='+@message_id.to_s if @message_id}>"
+      "#<Gmail::Message#{'0x%04x' % (object_id << 1)} mailbox=#{@mailbox.name}#{' uid='+@uid.to_s if @uid}#{' message_id='+@message_id.to_s if @message_id}>"
     end
-    
+
     def method_missing(meth, *args, &block)
       # Delegate rest directly to the message.
       if envelope.respond_to?(meth)
@@ -149,18 +185,17 @@ module Gmail
       end
     end
 
-    def envelope
-      @envelope ||= @gmail.mailbox(@mailbox.name) {
-        @gmail.conn.uid_fetch(uid, "ENVELOPE")[0].attr["ENVELOPE"]
-      }
+    private
+
+    def fetch(value)
+      @_attrs ||= begin
+        @gmail.mailbox(@mailbox.name) {
+          @gmail.conn.uid_fetch(uid, PREFETCH_ATTRS)[0]
+        }
+      end
+
+      @_attrs.attr[value]
     end
-    
-    def message
-      @message ||= Mail.new(@gmail.mailbox(@mailbox.name) { 
-        @gmail.conn.uid_fetch(uid, "RFC822")[0].attr["RFC822"] # RFC822
-      })
-    end
-    alias_method :raw_message, :message
 
   end # Message
 end # Gmail

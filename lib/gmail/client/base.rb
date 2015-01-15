@@ -1,4 +1,5 @@
 require 'thread'
+require_relative 'imap_extensions'
 
 module Gmail
   module Client
@@ -68,7 +69,12 @@ module Gmail
         @logged_in = false
       end
       alias :sign_out :logout
-      
+
+      # Disconnect from GMail service.
+      def disconnect
+        @imap && @imap.disconnect
+      end
+
       # Return labels object, which helps you with managing your GMail labels.
       # See <tt>Gmail::Labels</tt> for details.
       def labels
@@ -154,9 +160,9 @@ module Gmail
       #   end
       def mailbox(name, &block)
         @mailbox_mutex.synchronize do
-          name = name.to_s
+          name = Net::IMAP.decode_utf7(name.to_s)
           mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
-          switch_to_mailbox(name) if @current_mailbox != name
+          switch_to_mailbox(mailbox) if @current_mailbox != mailbox
 
           if block_given?
             mailbox_stack << @current_mailbox
@@ -199,8 +205,7 @@ module Gmail
       
       def switch_to_mailbox(mailbox)
         if mailbox
-          mailbox = Net::IMAP.encode_utf7(mailbox)
-          conn.select(mailbox)
+          conn.select(mailbox.encoded_name)
         end
         @current_mailbox = mailbox
       end

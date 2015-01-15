@@ -1,8 +1,19 @@
 # Gmail gem changelog
 
-## Unreleased
+## 0.5.0 - Unreleased
 
-* Fix IMAP library patch on Ruby 2 (@bootstraponline, @johnnyshields)
+* Support for XOAuth2 Client (@KieranP)
+* Improve support for non-english labels and mailboxes (@KieranP)
+* Fix IMAP library patch on Ruby 2 (@bootstraponline, @johnnyshields,  @awakia)
+* Include X-GM-MSGID (a unique, non-changing email identifier) on Message class (@KieranP)
+* Ability to search emails by a UID filter (@KieranP)
+* Add a way to disconnect the IMAP socket (@KieranP)
+* Better support timezones (@KieranP)
+* Add `emails_in_batches` method (@KieranP)
+* Gmail Message class: Fetch values in bulk and cache them (performance) (@KieranP)
+* Gmail Message class: Pull FLAGS to make #read? and #starred? methods work (@KieranP)
+* Gmail Message class: Don't mark an email as read when accessing the message (@KieranP)
+* Gmail Message class: Reorganisation and cleanup of method definitions (@KieranP)
 * Implement Travis CI (@johnnyshields)
 * Remove legacy dependency on MIME gem (@johnnyshields)
 * Upgrade to RSpec 3.1 and remove Mocha dependency (@johnnyshields)

@@ -40,3 +40,7 @@ desc 'Obfuscates account.yml file.'
 task :obfuscate do
   Spec::Obfuscation.encrypt_file(File.join(File.dirname(__FILE__), 'spec', 'account.yml'))
 end
+
+task :deobfuscate do
+  puts Spec::Obfuscation.decrypt_file(File.join(File.dirname(__FILE__), 'spec', 'account.yml.obfus'))
+end

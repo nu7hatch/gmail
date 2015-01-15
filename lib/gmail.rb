@@ -10,7 +10,8 @@ end
 
 class Object
   def to_imap_date
-    Date.parse(to_s).strftime("%d-%B-%Y")
+    date = respond_to?(:utc) ? utc.to_s : to_s
+    Date.parse(date).strftime("%d-%B-%Y")
   end
 end
 
@@ -27,7 +28,7 @@ module Gmail
     # ==== Examples
     #
     #   Gmail.new(:plain, "foo@gmail.com", "password")
-    #   Gmail.new(:xoauth, "foo@gmail.com", 
+    #   Gmail.new(:xoauth, "foo@gmail.com",
     #     :consumer_key => "",
     #     :consumer_secret => "",
     #     :token => "",
@@ -46,15 +47,16 @@ module Gmail
 
     ['', '!'].each { |kind|
       define_method("new#{kind}") do |*args, &block|                  # def new(*args, &block)
-        args.unshift(:plain) unless args.first.is_a?(Symbol)          #   args.unshift(:plain) unless args.first.is_a?(Symbol)  
-        client = Gmail::Client.new(*args)                             #   client = Gmail::Client.new(*args) 
-        client.send("connect#{kind}") and client.send("login#{kind}") #   client.connect and client.login
-                                                                      #  
+        args.unshift(:plain) unless args.first.is_a?(Symbol)          #   args.unshift(:plain) unless args.first.is_a?(Symbol)
+        client = Gmail::Client.new(*args)                             #   client = Gmail::Client.new(*args)
+        client.send("connect#{kind}")                                 #   client.connect
+        client.send("login#{kind}")                                   #   client.login
+                                                                      #
         if block_given?                                               #   if block_given?
           yield client                                                #     yield client
           client.logout                                               #     client.logout
         end                                                           #   end
-                                                                      #   
+                                                                      #
         client                                                        #   client
       end                                                             # end
     }
