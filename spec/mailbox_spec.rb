@@ -22,13 +22,13 @@ describe "A Gmail mailbox" do
 
   context "instance" do
     it "should be able to count all emails" do
-      mock_mailbox do |mailbox|
+      live_mailbox do |mailbox|
         mailbox.count.should > 0
       end
     end
 
     it "should be able to find messages" do
-      mock_mailbox do |mailbox|
+      live_mailbox do |mailbox|
         message = mailbox.emails.first
         mailbox.emails(:all, :from => message.from.first.name) == message.from.first.name
       end
@@ -36,7 +36,7 @@ describe "A Gmail mailbox" do
     
     it "should be able to do a full text search of message bodies" do
       pending "This can wait..."
-      #mock_mailbox do |mailbox|
+      #live_mailbox do |mailbox|
       #  message = mailbox.emails.first
       #  body = message.parts.blank? ? message.body.decoded : message.parts[0].body.decoded
       #  emails = mailbox.emails(:search => body.split(' ').first)
