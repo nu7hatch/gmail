@@ -35,7 +35,7 @@ describe "A Gmail mailbox" do
     end
     
     it "should be able to do a full text search of message bodies" do
-      pending "This can wait..."
+      skip "This can wait..."
       #mock_mailbox do |mailbox|
       #  message = mailbox.emails.first
       #  body = message.parts.blank? ? message.body.decoded : message.parts[0].body.decoded

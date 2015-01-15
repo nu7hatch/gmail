@@ -5,6 +5,7 @@
 * Fix IMAP library patch on Ruby 2 (@bootstraponline, @johnnyshields)
 * Implement Travis CI (@johnnyshields)
 * Remove legacy dependency on MIME gem (@johnnyshields)
+* Upgrade to RSpec 3.1 and remove Mocha dependency (@johnnyshields)
 
 ## 0.4.2
 

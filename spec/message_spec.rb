@@ -3,49 +3,49 @@ require 'spec_helper'
 describe "A Gmail message" do
   context "on initialize" do
     it "should set uid and mailbox" do
-      pending
+      skip
     end
   end
   
   context "instance" do
     it "should be able to mark itself as read" do
-      pending
+      skip
     end
     
     it "should be able to mark itself as unread" do
-      pending
+      skip
     end
     
     it "should be able to set star itself" do
-      pending
+      skip
     end
     
     it "should be able to unset start" do
-      pending
+      skip
     end
     
     it "should be able to archive itself" do
-      pending
+      skip
     end
     
     it "should be able to delete itself" do
-      pending
+      skip
     end
     
     it "should be able to move itself to spam" do
-      pending
+      skip
     end
     
     it "should be able to set given label" do
-      pending
+      skip
     end
     
     it "should be able to mark itself with given flag" do
-      pending
+      skip
     end
     
     it "should be able to move itself to given box" do
-      pending
+      skip
     end
   end 
 end

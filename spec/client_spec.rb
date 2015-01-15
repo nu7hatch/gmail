@@ -30,13 +30,13 @@ describe "Gmail client (Plain)" do
    
     it "should connect to GMail IMAP service" do 
       client = mock_client
-      client.connect!.should be_true
+      client.connect!.should be_truthy
     end
 
     it "should properly login to valid GMail account" do
       client = mock_client
-      client.connect.should be_true
-      client.login.should be_true
+      client.connect.should be_truthy
+      client.login.should be_truthy
       client.should be_logged_in
       client.logout
     end
@@ -44,7 +44,7 @@ describe "Gmail client (Plain)" do
     it "should raise error when given GMail account is invalid and errors enabled" do
       lambda {
         client = Gmail::Client::Plain.new("foo", "bar")
-        client.connect.should be_true
+        client.connect.should be_truthy
         client.login!.should_not be_nil
         }.should raise_error      
         ### FIX: can someone dig to the bottom of this?  We are getting NoMethodError instead of Gmail::Client::AuthorizationError in 1.9
@@ -53,22 +53,22 @@ describe "Gmail client (Plain)" do
     it "shouldn't raise error even though GMail account is invalid" do
       lambda {
         client = Gmail::Client::Plain.new("foo", "bar")
-        client.connect.should be_true
-        expect(client.login).to_not be_true
+        client.connect.should be_truthy
+        expect(client.login).to_not be_truthy
       }.should_not raise_error
     end
 
     it "shouldn't login when given GMail account is invalid" do
       client = Gmail::Client::Plain.new("foo", "bar")
-      client.connect.should be_true
-      client.login.should be_false
+      client.connect.should be_truthy
+      client.login.should be_falsey
     end
     
     it "should properly logout from GMail" do 
       client = mock_client
       client.connect
-      client.login.should be_true
-      client.logout.should be_true
+      client.login.should be_truthy
+      client.logout.should be_truthy
       client.should_not be_logged_in
     end
     
@@ -105,14 +105,14 @@ describe "Gmail client (Plain)" do
           to TEST_ACCOUNT[0]
           subject "Hello world!"
           body "Yeah, hello there!"
-        end.should be_true
+        end.should be_truthy
       end
     end
     
     it "should not raise error when mail can't be delivered and errors are disabled" do
       lambda { 
         client = mock_client
-        client.deliver(Mail.new {}).should be_false
+        client.deliver(Mail.new {}).should be false
       }.should_not raise_error
     end
     
@@ -154,24 +154,24 @@ describe "Gmail client (Plain)" do
       
       it "should be able to check if there is given label defined" do
         labels = subject
-        labels.exists?("INBOX").should be_true
-        labels.exists?("FOOBAR").should be_false
+        labels.exists?("INBOX").should be true
+        labels.exists?("FOOBAR").should be false
       end
       
       it "should be able to create given label" do
         labels = subject
         labels.create("MYLABEL")
-        labels.exists?("MYLABEL").should be_true
-        labels.create("MYLABEL").should be_false
+        labels.exists?("MYLABEL").should be true
+        labels.create("MYLABEL").should be false
         labels.delete("MYLABEL")
       end
       
       it "should be able to remove existing label" do
         labels = subject
         labels.create("MYLABEL")
-        labels.delete("MYLABEL").should be_true
-        labels.exists?("MYLABEL").should be_false
-        labels.delete("MYLABEL").should be_false
+        labels.delete("MYLABEL").should be true
+        labels.exists?("MYLABEL").should be false
+        labels.delete("MYLABEL").should be false
       end
     end
   end
