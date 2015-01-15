@@ -2,6 +2,8 @@
 
 ## 0.5.0 - Unreleased
 
+* Bugfix: Improperly processing labels containing parentheses (@ryanlchan #82)
+* Add support for localizing labels (@ryanlchan #83)
 * Support for XOAuth2 Client (@KieranP)
 * Improve support for non-english labels and mailboxes (@KieranP)
 * Fix IMAP library patch on Ruby 2 (@bootstraponline, @johnnyshields,  @awakia)
