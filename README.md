@@ -68,7 +68,7 @@ First of all require the `gmail` library.
     
 ### Authenticating gmail sessions
 
-This will you automatically log in to your account. 
+This will let you automatically log in to your account. 
 
     gmail = Gmail.connect(username, password)
     # play with your gmail...
