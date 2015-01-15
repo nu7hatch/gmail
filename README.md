@@ -137,6 +137,10 @@ conversation/thread will come as a separate message.
 
     gmail.inbox.emails(:unread, :before => Date.parse("2010-04-20"), :from => "myboss@gmail.com")
 
+The [gm option](https://developers.google.com/gmail/imap_extensions?csw=1#extension_of_the_search_command_x-gm-raw) enables use of the Gmail search syntax.
+
+    gmail.inbox.emails(gm: '"testing"')
+
 You can use also one of aliases:
 
     gmail.inbox.find(...)

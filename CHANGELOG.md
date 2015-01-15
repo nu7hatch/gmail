@@ -2,6 +2,7 @@
 
 ## 0.5.0 - Unreleased
 
+* Support X-GM-RAW (raw Gmail search syntax) in filter query (@bootstraponline)
 * Bugfix: Improperly processing labels containing parentheses (@ryanlchan #82)
 * Add support for localizing labels (@ryanlchan #83)
 * Support for XOAuth2 Client (@KieranP)
